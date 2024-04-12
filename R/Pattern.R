@@ -136,6 +136,7 @@ pattern_matrix_logical <- function(
   return(the_matrix)
 }
 
+
 #' @rdname pattern
 #'
 #' @export
@@ -146,7 +147,6 @@ pm_Conway_blinker <- function() {
   class(the_matrix) <- c("pattern_matrix_logical", class(the_matrix))
   return(the_matrix)
 }
-
 
 #' @rdname pattern
 #'
@@ -160,5 +160,42 @@ pm_Conway_glider <- function(nx = 50, ny = nx) {
   the_matrix[3, 4] <- the_matrix[4, 3] <- TRUE
   # Class
   class(the_matrix) <- c("pattern_matrix_logical", class(the_matrix))
+  return(the_matrix)
+}
+
+
+#' @rdname pattern
+#'
+#' @export
+pattern_matrix_species <- function(
+    nx = 32,
+    ny = nx,
+    S = 2,
+    Distribution = "lnorm",
+    sd = 1,
+    prob = 0.1,
+    alpha = 40) {
+  # Draw a random community
+  the_community <- entropart::rCommunity(
+    1,
+    size = 100 * nx * ny,
+    S = S,
+    Distribution = Distribution,
+    sd = sd,
+    prob = prob,
+    alpha = alpha,
+    CheckArguments = FALSE
+  )
+  # Names are numbers ---> maybe find a name generator for fun?
+  spNames <- c("fabaceae", "solanaceae")
+  #spNames<- seq(length(the_community))
+  # Make a matrix
+  the_matrix <- matrix(
+    sample(spNames, size = nx * ny, replace = TRUE, prob = the_community / sum(the_community)),
+    nrow = ny,
+    ncol = nx
+  )
+  # Class (be more precise)
+  class(the_matrix) <- c("pattern_matrix_species", class(the_matrix))
   return(the_matrix)
 }

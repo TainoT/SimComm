@@ -99,3 +99,72 @@ cm_Conway <- R6::R6Class("cm_Conway",
     }
   )
 )
+
+
+#' Test Class
+#'
+#' A [community_matrixmodel] where each cell contains an individual of one species.
+#' At each generation, an individual may survive or not and empty cells be filled with a new individual.
+#'
+#' The survival and generation rules are fixed by the mortality and reproduction rate of each individual.
+#' Edge effects are eliminated by a toroidal correction. (??? check that out)
+#'
+#' @docType class
+#' @param pattern The pattern which describe the location of agents.
+#' @param time The point of the timeline considered.
+#' Its value should be in `timeline`
+#' @param timeline A numeric vector that contains the points of time of interest.
+#' @param type The type of individuals. Information only.
+#' @export
+cm_test <- R6::R6Class("cm_test",
+  inherit = community_matrixmodel,
+  private = list(
+    evolve = function(time, save) {
+      # Prepare the buffer
+      self$prepare_buffer()
+
+      # Change cells
+      for(row in seq(nrow(self$pattern))) {
+        for(col in seq(ncol(self$pattern))) {
+          # self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
+          # self$pattern[row, col] <- (self$pattern[row, col] & (n_neighbors %in% self$to_survive))
+          #                         | (!self$pattern[row, col] & (n_neighbors %in% self$to_generate))
+          if (runif(1, 0, 1) < self$death_rate)
+            self$pattern[row, col] <- STATE_OF_DEATH()
+          #if (runif(1, 0, 1) < self$birth_rate)
+          # that one is a bit confusing, maybe i dont have to do that since lack of death imply occupation
+
+
+        }
+      }
+
+      if(save){
+        #Save the new pattern
+        self$run_patterns[, , which(self$timeline == time)] <- self$pattern
+      }
+    }
+  ),
+  public = list(
+    #' @field death_rate The mortality rate of an individual.
+    #' Default is `0.05`
+    death_rate = 0.05,
+    #' @field birth_rate The reproduction rate of an individual.
+    #' Default is `0.1`
+    birth_rate = 0.1,
+
+    #' @description
+    #' Create a new instante of this [R6][R6::R6Class] class.
+    initialize = function(
+        pattern = pattern_matrix_species(),
+        timeline = 0,
+        type = "Species",
+        neighborhood = "Moore 1") {
+      super$initialize(
+        pattern = pattern,
+        timeline = timeline,
+        type = type,
+        neighborhood = neighborhood,
+      )
+    }
+  )
+)
