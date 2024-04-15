@@ -55,7 +55,7 @@ cm_drift <- R6::R6Class("cm_drift",
 cm_Conway <- R6::R6Class("cm_Conway",
   inherit = community_matrixmodel,
   private = list(
-    evolve =  function(time, save) {
+    evolve = function(time, save) {
       # Prepare the buffer
       self$prepare_buffer()
 
@@ -101,7 +101,7 @@ cm_Conway <- R6::R6Class("cm_Conway",
 )
 
 
-#' Test Class
+#' Hubbell's Neutral Theory Integration Class
 #'
 #' A [community_matrixmodel] where each cell contains an individual of one species.
 #' At each generation, an individual may survive or not and empty cells be filled with a new individual.
@@ -116,7 +116,7 @@ cm_Conway <- R6::R6Class("cm_Conway",
 #' @param timeline A numeric vector that contains the points of time of interest.
 #' @param type The type of individuals. Information only.
 #' @export
-cm_test <- R6::R6Class("cm_test",
+cm_hubbell <- R6::R6Class("cm_hubbell",
   inherit = community_matrixmodel,
   private = list(
     evolve = function(time, save) {
@@ -126,15 +126,13 @@ cm_test <- R6::R6Class("cm_test",
       # Change cells
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
-          # self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
-          # self$pattern[row, col] <- (self$pattern[row, col] & (n_neighbors %in% self$to_survive))
-          #                         | (!self$pattern[row, col] & (n_neighbors %in% self$to_generate))
-          if (runif(1, 0, 1) < self$death_rate)
-            self$pattern[row, col] <- STATE_OF_DEATH()
-          #if (runif(1, 0, 1) < self$birth_rate)
-          # that one is a bit confusing, maybe i dont have to do that since lack of death imply occupation
+          if (isFALSE(runif(1, 0, 1) < self$death_rate))
+            self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
+          else
+            self$pattern[row, col] <- self$pattern[row, col]
 
-
+          # Maybe too simple, does not count in the death state
+          # death state = empty cell (perturbation, dead tree, etc)
         }
       }
 
@@ -146,12 +144,14 @@ cm_test <- R6::R6Class("cm_test",
   ),
   public = list(
     #' @field death_rate The mortality rate of an individual.
-    #' Default is `0.05`
-    death_rate = 0.05,
-    #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.1`
-    birth_rate = 0.1,
-
+    death_rate = 0.1,
+    #' @field birth_rate The reproduction rate of an individual.
+    #' Default is `0.2`
+    birth_rate = 0.2,
+    #' @field migration_rate The migration rate of a species of a meta community
+    #' Default is `0.005`
+    migration_rate = 0.005,
     #' @description
     #' Create a new instante of this [R6][R6::R6Class] class.
     initialize = function(
@@ -163,8 +163,29 @@ cm_test <- R6::R6Class("cm_test",
         pattern = pattern,
         timeline = timeline,
         type = type,
-        neighborhood = neighborhood,
-      )
-    }
-  )
+        neighborhood = neighborhood
+      )#,
+      # I can add new functions on initialization here, including the meta com
+    },
+
+    #' @description
+    #' Change the demographic rates
+    #' `death_rate`, `birth_rate` and `migration_rate`(unused for now)
+    set_rate = function(
+    death_rate = 0.1,
+    birth_rate = 0.2) {
+      death_rate = death_rate
+      birth_rate = birth_rate
+    },
+
+    #' @description
+    #' Draw the abundance of each species over time
+    plot_line = function() {
+      the_pattern <- t(self$saved_pattern(time))
+      return(the_pattern)
+      }
+
+    #' @description
+    #' call for community ?
+ )
 )

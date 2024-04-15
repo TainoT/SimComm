@@ -187,8 +187,9 @@ pattern_matrix_species <- function(
     CheckArguments = FALSE
   )
   # Names are numbers ---> maybe find a name generator for fun?
-  spNames <- c("fabaceae", "solanaceae")
-  #spNames<- seq(length(the_community))
+  # naming does not work for animate = T
+  #spNames <- c("fabaceae", "solanaceae")
+  spNames<- seq(length(the_community))
   # Make a matrix
   the_matrix <- matrix(
     sample(spNames, size = nx * ny, replace = TRUE, prob = the_community / sum(the_community)),
