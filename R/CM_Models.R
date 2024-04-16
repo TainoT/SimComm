@@ -149,9 +149,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
     birth_rate = 0.2,
-    #' @field migration_rate The migration rate of a species of a meta community
-    #' Default is `0.005`
-    migration_rate = 0.005,
     #' @description
     #' Create a new instante of this [R6][R6::R6Class] class.
     initialize = function(
@@ -181,8 +178,11 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @description
     #' Draw the abundance of each species over time
     plot_line = function() {
-      the_pattern <- t(self$saved_pattern(time))
-      return(the_pattern)
+      plot(self$along_time(entropart::Richness, Correction = "None", CheckArguments = F), type = "l")
+      #the_plotline <- data.frame(self$timeline, self$saved_pattern(self$timeline))
+
+      # ggplot(the_plotline, aes(x = self$timeline, y = self$saved_pattern(timeline))) +
+      #   geom_line()
       }
 
     #' @description

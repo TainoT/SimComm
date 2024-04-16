@@ -4,6 +4,7 @@
 #' The class generate a community of a large number of species.
 #'
 #' @docType class
+#' @param J The abundance of individuals
 #' @param S The number of species.
 #' @param Distribution The distribution of species frequencies. May be "lnorm" (log-normal), "lseries" (log-series), "geom" (geometric) or "bstick" (broken stick).
 #' @param sd The simulated distribution standard deviation. For the log-normal distribution, this is the standard deviation on the log scale.
@@ -21,10 +22,46 @@
 #' @export
 community_param <- R6::R6Class("community_param",
   private = list(
-
   ),
   public = list(
+    S = 300,
+    Distribution = "lnorm",
+    sd = 1,
+    prob = 0.1,
+    alpha = 40
 
   )
 )
 
+#' Local
+#'
+#'
+local_pc <- R6::R6Class("local_pc",
+  inherit = community_param,
+  private = list(
+
+  ),
+  public = list(
+    #' @field death_rate The mortality rate of an individual.
+    #' Default is `0.1`
+    death_rate = 0.1,
+    #' @field birth_rate The reproduction rate of an individual.
+    #' Default is `0.2`
+    birth_rate = 0.2
+    #' @field speciation_rate The speciation rate of an individual
+    #' Default is `0.00001`
+  )
+)
+
+local_pc <- R6::R6Class("local_pc",
+  inherit = community_param,
+  private = list(
+
+  ),
+  public = list(
+    #' @field migration_rate The migration rate of a species of a meta community
+    #' Default is `0.005`
+    migration_rate = 0.005
+
+  )
+)
