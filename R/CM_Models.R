@@ -165,6 +165,8 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       )#,
       # I can add new functions on initialization here, including the meta com
       # its resetting the thing, meaning im not even taking in the object that exist
+      # how about i could do a new() on the model, that take in a previously created community class? 
+      # basically, I would have to do a class = NULL in the list, this way, i would be able to access the same community elsewhere, without that silly defaulting 
       commu <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate)
       if(is.null(self$pattern))
       {
