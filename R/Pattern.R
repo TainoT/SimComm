@@ -189,6 +189,9 @@ pattern_matrix_species <- function(
   # Names are numbers ---> maybe find a name generator for fun?
   # naming does not work for animate = T
   #spNames <- c("fabaceae", "solanaceae")
+  # issue is that while it's good enough for counting, it's also defaulting
+  # the color when a species dies so red + orange + white, orange dies first
+  # then red dies, and the entire map is then orange, so we ough to fix it a bit
   spNames<- seq(length(the_community))
   # Make a matrix
   the_matrix <- matrix(

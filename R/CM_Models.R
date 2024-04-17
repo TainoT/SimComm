@@ -53,9 +53,9 @@ cm_drift <- R6::R6Class("cm_drift",
 #' @param type The type of individuals. Informational only.
 #' @export
 cm_Conway <- R6::R6Class("cm_Conway",
-  inherit = community_matrixmodel,
-  private = list(
-    evolve = function(time, save) {
+                         inherit = community_matrixmodel,
+                         private = list(
+                           evolve = function(time, save) {
       # Prepare the buffer
       self$prepare_buffer()
 
@@ -126,6 +126,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # Change cells
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
+          # Roll a dice between 0 and 1, if the roll is lower than drate, then run it
           if (isFALSE(runif(1, 0, 1) < self$death_rate))
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           else
@@ -150,9 +151,9 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' Default is `0.2`
     birth_rate = 0.2,
     #' @description
-    #' Create a new instante of this [R6][R6::R6Class] class.
+    #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(
-        pattern = pattern_matrix_species(),
+        pattern = NULL,
         timeline = 0,
         type = "Species",
         neighborhood = "Moore 1") {
@@ -163,17 +164,26 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         neighborhood = neighborhood
       )#,
       # I can add new functions on initialization here, including the meta com
+      # its resetting the thing, meaning im not even taking in the object that exist
+      commu <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate)
+      if(is.null(self$pattern))
+      {
+        self$pattern <- commu$local_matrix_class()
+        print("sum")
+      }
+      else
+        warning("Something broke, no pattern returned")
     },
 
-    #' @description
-    #' Change the demographic rates
-    #' `death_rate`, `birth_rate` and `migration_rate`(unused for now)
-    set_rate = function(
-    death_rate = 0.1,
-    birth_rate = 0.2) {
-      death_rate = death_rate
-      birth_rate = birth_rate
-    },
+    #' #' @description
+    #' #' Change the demographic rates
+    #' #' `death_rate`, `birth_rate` and `migration_rate`(unused for now)
+    #' set_rate = function(
+    #' death_rate = 0.1,
+    #' birth_rate = 0.2) {
+    #'   death_rate = death_rate
+    #'   birth_rate = birth_rate
+    #' },
 
     #' @description
     #' Draw the abundance of each species over time
