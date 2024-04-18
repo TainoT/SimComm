@@ -150,8 +150,17 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
     birth_rate = 0.2,
+    #' @field community The local community
+    local_cm = NULL,
+
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
+    #' What it does : default the values
+    #'                check if pattern is empty (no argument given)
+    #'                else
+    #'                create new community (local_cm), by default, draw it
+    #'                send the resulting matrix to pattern
+    #' TODO
     initialize = function(
         pattern = NULL,
         timeline = 0,
@@ -162,21 +171,48 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         timeline = timeline,
         type = type,
         neighborhood = neighborhood
-      )#,
-      # I can add new functions on initialization here, including the meta com
-      # its resetting the thing, meaning im not even taking in the object that exist
-      # how about i could do a new() on the model, that take in a previously created community class? 
-      # basically, I would have to do a class = NULL in the list, this way, i would be able to access the same community elsewhere, without that silly defaulting 
-      commu <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate)
-      if(is.null(self$pattern))
+      )
+      # TODO N/A : add whatever I want here when I create a neutral theory model
+      #            meaning : the model that will plot, the local community, the meta community
+
+      # Check if there's no given pattern first - Generally from a community created prior the model
+      if(is.null(self$pattern) == FALSE)
       {
-        self$pattern <- commu$local_matrix_class()
-        print("sum")
+        ## check typing, we need something that fit $pattern and send an error otherwise
+        ## if.matrix == TRUE maybe
+        self$pattern <- pattern
+        print("pattern set from outside model")
       }
-      else
-        warning("Something broke, no pattern returned")
+      self$local_cm <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate, draw = TRUE)
+      print("its ok here")
+      self$pattern <- self$local_cm$the_matrix
+      print("its ok here too")
     },
 
+    #' @description
+    #' Redraw the model with new values of communities
+    #' TODO : it should call set_values and draw_matrix
+    #'        call make_local(draw = T) if the option is available
+    redraw = function(
+      nx = 20,
+      ny = nx,
+      S = 2,
+      Distribution = "lnorm",
+      sd = 1,
+      prob = 0.1,
+      alpha = 40) {
+      self$local_cm$set_values(
+        nx = self$local_cm$nx,
+        ny = self$local_cm$ny,
+        S = self$local_cm$S,
+        Distribution = self$local_cm$Distribution,
+        sd = self$local_cm$sd,
+        prob = self$local_cm$prob,
+        alpha = self$local_cm$alpha)
+      self$pattern <- self$local_cm$the_matrix
+      },
+
+    ## TODO : delete ?
     #' #' @description
     #' #' Change the demographic rates
     #' #' `death_rate`, `birth_rate` and `migration_rate`(unused for now)
@@ -187,6 +223,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #'   birth_rate = birth_rate
     #' },
 
+
+    ## TODO NA : once all is clean, try it
+    ## Not the priority, first finish classes, then meta community
+    ## Only then, we can explore how to display results
     #' @description
     #' Draw the abundance of each species over time
     plot_line = function() {
@@ -196,8 +236,5 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # ggplot(the_plotline, aes(x = self$timeline, y = self$saved_pattern(timeline))) +
       #   geom_line()
       }
-
-    #' @description
-    #' call for community ?
  )
 )

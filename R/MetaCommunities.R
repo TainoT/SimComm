@@ -14,6 +14,7 @@
 #' @param sd The simulated distribution standard deviation. For the log-normal distribution, this is the standard deviation on the log scale.
 #' @param prob The proportion of ressources taken by successive species in the geometric model.
 #' @param alpha Fisher's alpha in the log-series model.
+#' @param draw the model is being drawn in set_values
 #'
 #' @param abundance The amount of individual in the community (community size)
 #' @param death_rate The mortality rate of individuals
@@ -35,6 +36,9 @@ community_param <- R6::R6Class("community_param",
     sd = NULL,
     prob = NULL,
     alpha = NULL,
+    draw = NULL,
+
+    the_matrix = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -45,8 +49,7 @@ community_param <- R6::R6Class("community_param",
 
     #' @description
     #' Set values of the community generation parameters (set to default if no arguments)
-##### it should probably be on the cm_hubbell -> actually no, user can call default community
-##### but for finer details, they're free to create a whole community object and set its values
+    #' TODO 19/04 : make it cleaner, it should only change values, nothing else
     set_values = function(
     nx = 20,
     ny = nx,
@@ -63,14 +66,15 @@ community_param <- R6::R6Class("community_param",
       self$prob = prob
       self$alpha = alpha
       if (nx == 20)
-        print("values are defaulted : community_param")
-      else
-        print("new values are in : community_param")
+        print("values are NOT changed")
+      else{
+        print("values got changed")}
     },
 
     #' @description
     #' Draw a community with no adjectives
-    pattern_matrix_class = function(){
+    #' TODO 19/04 : it should work properly, do a verification still, esp the return
+    draw_matrix = function(redraw = FALSE){
       the_community <- entropart::rCommunity(
       1,
       size = 100 * self$nx * self$ny,
@@ -84,7 +88,9 @@ community_param <- R6::R6Class("community_param",
       # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
       spNames <- seq(length(the_community))
       # Make a matrix, thats the matrix we sending and that should be studied
-      the_matrix <- matrix(
+      if (redraw == TRUE)
+        self$the_matrix <- NULL
+      self$the_matrix <- matrix(
         sample(spNames, size = self$nx * self$ny, replace = TRUE,
                prob = the_community / sum(the_community)),
         nrow = self$ny,
@@ -92,11 +98,10 @@ community_param <- R6::R6Class("community_param",
       )
       # are we sure we need to add that name ?
       # i can send the_matrix right away and let the next function deal with it
-      class(the_matrix) <- c("pattern_matrix_class", class(the_matrix))
-      print("community drawn : community_param")
-      return(the_matrix)
+      class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
+      print("draw_matrix called")
+      return(self$the_matrix)
     }
-
   )
 )
 
@@ -117,20 +122,31 @@ local_pc <- R6::R6Class("local_pc",
     birth_rate = 0.22,
     #' @field speciation_rate The speciation rate of an individual
     #' Default is `0.00001`
+    speciation_rate = 0.00001,
 
-    #' keep the value as default, its not great if its NULL
-    #' but allow modification
-    #' maybe create a brand new set_values (maybe not overwriting) for ecological values
-    initialize = function(death_rate = self$death_rate, birth_rate = self$birth_rate){
+    #' @description
+    #' Create a new instance of this [R6][R6::R6Class] class.
+    #' TODO N/A : add more ecological rates
+    #'            do a documentation on it, its a bit confusing right now
+    initialize = function(
+        death_rate = self$death_rate,
+        birth_rate = self$birth_rate,
+        draw = FALSE){
       self$death_rate <- death_rate
       self$birth_rate <- birth_rate
-      super$set_values()
-      print("instanciation has been called : local_pc")
+      if (draw){
+        super$the_matrix <- self$make_local(draw = draw)
+        print("true")
+      }
+      print("local community is created")
     },
 
     #' @description
-    #' Local community default community drawing
-    local_matrix_class = function(
+    #' Local community default community drawing - add death/birth_rate in the matrix
+    #' TODO 19/04 : Verify if defaulting values in argument is right
+    #'              I could do an option and make a set_value ?
+    #'              strengthen the code, verify if the rates are on same level IN the matrix
+    make_local = function(
     nx = 10,
     ny = nx,
     S = 2,
@@ -139,27 +155,33 @@ local_pc <- R6::R6Class("local_pc",
     prob = 0.1,
     theta = 40,
     death_rate = 0.1,
-    birth_rate = 0.2) {
-      # not ideal, im calling the superfunction, but i gotta actually rewrite it because it's
-      # using brand new values
-      # remember : the superclass is only creating a community
-      # in the local, we're specifying default values closer to a local community
-      # and adding death/birth rate
-      the_matrix <- super$pattern_matrix_class()
+    birth_rate = 0.2,
+    draw = FALSE) {
+      # We're NOT drawing the matrix
+      # if .... TODO : that's confusing here
+      if (draw == FALSE)
+        super$set_values(nx = self$nx, ny = self$ny, S = self$S,
+                       Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
+      else
+        super$set_values(nx = nx, ny = ny, S = S,
+                         Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+
+      # We're drawing the matrix with the previous values, matrix is NULL before that
+      super$the_matrix <- super$draw_matrix()
+
       # remove the first str from the inherit
-      class(the_matrix) <- c("local_matrix_class", class(the_matrix), death_rate, birth_rate)
-      print("community drawn : local_pc")
-      return(the_matrix)
+      class(super$the_matrix) <- c("make_local", class(super$the_matrix), death_rate, birth_rate)
+      print("make_local called")
+      return(super$the_matrix)
     }
   )
 )
 
-
-# TODO for 18/04, keep working on making sure this code is rock solid, then open up to meta community
+# TODO for 19/04, keep working on making sure this code is rock solid, then open up to meta community
 # with options and all that
 
 
-#' meta_pc <- R6::R6Class("local_pc",
+#' meta_pc <- R6::R6Class("meta_pc",
 #'   inherit = community_param,
 #'   private = list(
 #'
@@ -181,3 +203,4 @@ local_pc <- R6::R6Class("local_pc",
 #'
 #'   )
 #' )
+
