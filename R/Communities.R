@@ -30,6 +30,7 @@ community_param <- R6::R6Class("community_param",
   private = list(
   ),
   public = list(
+    J = NULL, # TODO use it to replace nx/ny
     nx = NULL,
     ny = NULL,
     S = NULL,
@@ -178,7 +179,7 @@ local_pc <- R6::R6Class("local_pc",
 # with options and all that
 
 
-local_pc <- R6::R6Class("local_pc",
+meta_pc <- R6::R6Class("meta_pc",
   inherit = community_param,
   private = list(
 
@@ -199,27 +200,27 @@ local_pc <- R6::R6Class("local_pc",
         migration_rate = self$migration_rate,
         speciation_rate = self$speciation_rate,
         draw = FALSE){
-      self$death_rate <- death_rate
-      self$birth_rate <- birth_rate
+      self$migration_rate <- migration_rate
+      self$speciation_rate <- speciation_rate
       if (draw){
-        self$the_matrix <- self$make_local(draw = draw)
+        self$the_matrix <- self$make_meta(draw = draw)
         print("true")
       }
-      print("local community is created")
+      print("meta community is created")
     },
 
     #' @description
     #' Meta community default community drawing - add migr/spec_rate in the matrix
-    make_local = function(
+    make_meta = function(
     nx = 10,
     ny = nx,
-    S = 2,
+    S = 2, ## TODO : use Fisher's to get a proper N number here
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
     theta = 40,
-    death_rate = 0.1,
-    birth_rate = 0.2,
+    migration_rate = 0.1,
+    speciation_rate = 0.2,
     draw = FALSE) {
       # We're NOT drawing the matrix
       # if .... TODO : that's confusing here

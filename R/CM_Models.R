@@ -126,6 +126,8 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       self$prepare_buffer()
 
       # Change cells
+
+          ## RULE FOR DEMOGRAPHIC DRIFT
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
           # Roll a dice between 0 and 1, if the roll is lower than drate, then run it
@@ -133,6 +135,15 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           else
             self$pattern[row, col] <- self$pattern[row, col]
+
+          ## RULE TO ADD FOR SPECIATION
+          #'
+          #' check if alive, we cant have a death and speciation at the same time
+          #' when its dead, let the neighbour colonize the space
+          #' so for 0.1 --> check on daily 10
+
+
+          ## RULE TO ADD FOR MIGRATION
 
           # Maybe too simple, does not count in the death state, NOT A PRIORITY
           # death state = empty cell (perturbation, dead tree, etc)
