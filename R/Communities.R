@@ -8,6 +8,7 @@
 #' @param J The abundance of individuals
 #' @param S The number of species.
 #'
+#' For the community drawing with entropart
 #' @param nx The size of horizontal axis
 #' @param ny The size of vertical axis
 #' @param Distribution The distribution of species frequencies. May be "lnorm" (log-normal), "lseries" (log-series), "geom" (geometric) or "bstick" (broken stick).
@@ -65,16 +66,12 @@ community_param <- R6::R6Class("community_param",
       self$sd = sd
       self$prob = prob
       self$alpha = alpha
-      if (nx == 20)
-        print("values are NOT changed")
-      else{
-        print("values got changed")}
     },
 
     #' @description
     #' Draw a community with no adjectives
     #' TODO 19/04 : it should work properly, do a verification still, esp the return
-    draw_matrix = function(redraw = FALSE){
+    draw_matrix = function(){#redraw = FALSE){
       the_community <- entropart::rCommunity(
       1,
       size = 100 * self$nx * self$ny,
@@ -88,8 +85,8 @@ community_param <- R6::R6Class("community_param",
       # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
       spNames <- seq(length(the_community))
       # Make a matrix, thats the matrix we sending and that should be studied
-      if (redraw == TRUE)
-        self$the_matrix <- NULL
+      #if (redraw == TRUE)
+      self$the_matrix <- NULL
       self$the_matrix <- matrix(
         sample(spNames, size = self$nx * self$ny, replace = TRUE,
                prob = the_community / sum(the_community)),
@@ -135,7 +132,7 @@ local_pc <- R6::R6Class("local_pc",
       self$death_rate <- death_rate
       self$birth_rate <- birth_rate
       if (draw){
-        super$the_matrix <- self$make_local(draw = draw)
+        self$the_matrix <- self$make_local(draw = draw)
         print("true")
       }
       print("local community is created")
@@ -159,20 +156,20 @@ local_pc <- R6::R6Class("local_pc",
     draw = FALSE) {
       # We're NOT drawing the matrix
       # if .... TODO : that's confusing here
-      if (draw == FALSE)
-        super$set_values(nx = self$nx, ny = self$ny, S = self$S,
+      # if (draw == FALSE)
+      self$set_values(nx = self$nx, ny = self$ny, S = self$S,
                        Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
-      else
-        super$set_values(nx = nx, ny = ny, S = S,
-                         Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+      # else
+      #   self$set_values(nx = nx, ny = ny, S = S,
+      #                    Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
 
       # We're drawing the matrix with the previous values, matrix is NULL before that
-      super$the_matrix <- super$draw_matrix()
+      self$the_matrix <- self$draw_matrix()
 
       # remove the first str from the inherit
-      class(super$the_matrix) <- c("make_local", class(super$the_matrix), death_rate, birth_rate)
+      class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
       print("make_local called")
-      return(super$the_matrix)
+      return(self$the_matrix)
     }
   )
 )
@@ -181,26 +178,65 @@ local_pc <- R6::R6Class("local_pc",
 # with options and all that
 
 
-#' meta_pc <- R6::R6Class("meta_pc",
-#'   inherit = community_param,
-#'   private = list(
-#'
-#'   ),
-#'   public = list(
-#'     nx = 10,
-#'     ny = nx,
-#'     S = 2,
-#'     Distribution = "lnorm",
-#'     sd = 1,
-#'     prob = 0.1,
-#'     alpha = 40,
-#'
-#'     #' @field migration_rate The migration rate of a species of a meta community
-#'     #' Default is `0.005`
-#'     migration_rate = 0.005
-#'     #' @field theta The diversity number of the meta community
-#'
-#'
-#'   )
-#' )
+local_pc <- R6::R6Class("local_pc",
+  inherit = community_param,
+  private = list(
 
+  ),
+  public = list(
+    #' @field migration_rate The migration of an individual.
+    #' Default is `0.055`
+    migration_rate = 0.055,
+    #' @field speciation_rate The speciation rate of an individual
+    #' Default is `0.00001`
+    speciation_rate = 0.00001,
+
+    #' @description
+    #' Create a new instance of this [R6][R6::R6Class] class.
+    #' TODO N/A : add more ecological rates
+    #'            do a documentation on it, its a bit confusing right now
+    initialize = function(
+        migration_rate = self$migration_rate,
+        speciation_rate = self$speciation_rate,
+        draw = FALSE){
+      self$death_rate <- death_rate
+      self$birth_rate <- birth_rate
+      if (draw){
+        self$the_matrix <- self$make_local(draw = draw)
+        print("true")
+      }
+      print("local community is created")
+    },
+
+    #' @description
+    #' Meta community default community drawing - add migr/spec_rate in the matrix
+    make_local = function(
+    nx = 10,
+    ny = nx,
+    S = 2,
+    Distribution = "lnorm",
+    sd = 1,
+    prob = 0.1,
+    theta = 40,
+    death_rate = 0.1,
+    birth_rate = 0.2,
+    draw = FALSE) {
+      # We're NOT drawing the matrix
+      # if .... TODO : that's confusing here
+      # if (draw == FALSE)
+      self$set_values(nx = self$nx, ny = self$ny, S = self$S,
+                      Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
+      # else
+      #   self$set_values(nx = nx, ny = ny, S = S,
+      #                    Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+
+      # We're drawing the matrix with the previous values, matrix is NULL before that
+      self$the_matrix <- self$draw_matrix()
+
+      # remove the first str from the inherit
+      class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
+      print("make_local called")
+      return(self$the_matrix)
+    }
+                        )
+)

@@ -119,6 +119,8 @@ cm_Conway <- R6::R6Class("cm_Conway",
 cm_hubbell <- R6::R6Class("cm_hubbell",
   inherit = community_matrixmodel,
   private = list(
+    #' TODO add an option to change the rules on the fly ?
+    #' Realm of Cellular Automata here
     evolve = function(time, save) {
       # Prepare the buffer
       self$prepare_buffer()
@@ -132,7 +134,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
           else
             self$pattern[row, col] <- self$pattern[row, col]
 
-          # Maybe too simple, does not count in the death state
+          # Maybe too simple, does not count in the death state, NOT A PRIORITY
           # death state = empty cell (perturbation, dead tree, etc)
         }
       }
@@ -146,7 +148,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
   public = list(
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
-    death_rate = 0.1,
+    death_rate = 0.9,
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
     birth_rate = 0.2,
@@ -175,42 +177,46 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # TODO N/A : add whatever I want here when I create a neutral theory model
       #            meaning : the model that will plot, the local community, the meta community
 
-      # Check if there's no given pattern first - Generally from a community created prior the model
-      if(is.null(self$pattern) == FALSE)
-      {
-        ## check typing, we need something that fit $pattern and send an error otherwise
-        ## if.matrix == TRUE maybe
-        self$pattern <- pattern
-        print("pattern set from outside model")
-      }
+      # We're creating the local community model
       self$local_cm <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate, draw = TRUE)
       print("its ok here")
+
       self$pattern <- self$local_cm$the_matrix
       print("its ok here too")
+      # TODO Check if there's no given pattern first - Generally from a community created prior the model
+      # if(is.null(self$pattern) == FALSE)
+      # {
+      #   ## check typing, we need something that fit $pattern and send an error otherwise
+      #   ## if.matrix == TRUE maybe
+      #   self$pattern <- pattern
+      #   print("pattern set from outside model")
+      # }
     },
 
     #' @description
     #' Redraw the model with new values of communities
     #' TODO : it should call set_values and draw_matrix
     #'        call make_local(draw = T) if the option is available
-    redraw = function(
-      nx = 20,
-      ny = nx,
-      S = 2,
-      Distribution = "lnorm",
-      sd = 1,
-      prob = 0.1,
-      alpha = 40) {
-      self$local_cm$set_values(
-        nx = self$local_cm$nx,
-        ny = self$local_cm$ny,
-        S = self$local_cm$S,
-        Distribution = self$local_cm$Distribution,
-        sd = self$local_cm$sd,
-        prob = self$local_cm$prob,
-        alpha = self$local_cm$alpha)
-      self$pattern <- self$local_cm$the_matrix
-      },
+    #'
+    #' TODO : add option to modify value of model ?
+    # redraw = function(
+    #   nx = 20,
+    #   ny = nx,
+    #   S = 2,
+    #   Distribution = "lnorm",
+    #   sd = 1,
+    #   prob = 0.1,
+    #   alpha = 40) {
+    #   self$local_cm$set_values(
+    #     nx = self$local_cm$nx,
+    #     ny = self$local_cm$ny,
+    #     S = self$local_cm$S,
+    #     Distribution = self$local_cm$Distribution,
+    #     sd = self$local_cm$sd,
+    #     prob = self$local_cm$prob,
+    #     alpha = self$local_cm$alpha)
+    #   self$pattern <- self$local_cm$the_matrix
+    #   },
 
     ## TODO : delete ?
     #' #' @description
