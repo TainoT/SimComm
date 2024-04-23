@@ -563,6 +563,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         ylab = "",
         axes = FALSE,
         asp = 1,
+        col = hcl.colors(12, "YlOrRd", rev = TRUE),
       ...)
       if (sleep > 0) animation::ani.pause(sleep)
     },

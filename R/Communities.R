@@ -75,6 +75,7 @@ community_param <- R6::R6Class("community_param",
     draw_matrix = function(){#redraw = FALSE){
       the_community <- entropart::rCommunity(
       1,
+      #bit64::as.integer64 is an option here
       size = 100 * self$nx * self$ny,
       S = self$S,
       Distribution = self$Distribution,
@@ -96,7 +97,7 @@ community_param <- R6::R6Class("community_param",
       )
       # are we sure we need to add that name ?
       # i can send the_matrix right away and let the next function deal with it
-      class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
+#-----class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       print("draw_matrix called")
       return(self$the_matrix)
     }
@@ -128,10 +129,10 @@ local_pc <- R6::R6Class("local_pc",
     #'            do a documentation on it, its a bit confusing right now
     initialize = function(
         death_rate = self$death_rate,
-        birth_rate = self$birth_rate,
+        speciation_rate = self$speciation_rate,
         draw = FALSE){
       self$death_rate <- death_rate
-      self$birth_rate <- birth_rate
+      self$speciation_rate <- speciation_rate
       if (draw){
         self$the_matrix <- self$make_local(draw = draw)
         print("true")
@@ -168,7 +169,9 @@ local_pc <- R6::R6Class("local_pc",
       self$the_matrix <- self$draw_matrix()
 
       # remove the first str from the inherit
-      class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
+
+#-----class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
+
       print("make_local called")
       return(self$the_matrix)
     }
@@ -192,46 +195,50 @@ meta_pc <- R6::R6Class("meta_pc",
     migration_rate = 0.055,
     #' @field speciation_rate The speciation rate of an individual
     #' Default is `0.00001`
-    speciation_rate = 0.00001,
+    speciation_rate = 0.0011,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(
-        migration_rate = self$migration_rate,
-        speciation_rate = self$speciation_rate,
-        draw = FALSE){
+        migration_rate = self$migration_rate
+        # speciation_rate = self$speciation_rate,
+        ){
       self$migration_rate <- migration_rate
-      self$speciation_rate <- speciation_rate
-      if (draw){
-        self$the_matrix <- self$make_meta(draw = draw)
-        print("true")
-      }
+      # self$speciation_rate <- speciation_rate
+      self$the_matrix <- self$make_meta()
       print("meta community is created")
     },
 
     #' @description
     #' Meta community default community drawing - add migr/spec_rate in the matrix
     make_meta = function(
-    nx = 10,
+    nx = 4000,
     ny = nx,
-    S = 2, ## TODO : use Fisher's to get a proper N number here
+    S = 100, ## TODO : use Fisher's to get a proper N number here
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
     theta = 40,
-    migration_rate = 0.1,
-    speciation_rate = 0.2,
-    draw = FALSE) {
+    migration_rate = 0.05) {
       # Register new values for attributes before making matrix
-      self$set_values(nx = self$nx, ny = self$ny, S = self$S,
-                      Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
+      # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
+      #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
+      if (nx > 4000) {
+        nx = 4000
+        ny = nx
+        warning("Too large number, defaulted back to the max allowed")
+      }
+      self$the_matrix <- NULL
+      self$set_values(nx = nx, ny = ny, S = S,
+                      Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+      # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
+      #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
       # Make the matrix
       self$the_matrix <- self$draw_matrix()
-
       # remove the first str from the inherit
-      class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
-      print("make_local called")
+#-----class(self$the_matrix) <- c("make_meta", class(self$the_matrix), migration_rate)
+      print("make_meta called")
       return(self$the_matrix)
-      }
+    }
     )
 )

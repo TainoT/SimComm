@@ -140,7 +140,8 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
             }
           else if (runif(1, 0, 1) < self$migration_rate) {
             print("immigration") # something about sampling from meta com
-            self$pattern[row, col] <- self$pattern[row, col]
+            self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
+            # self$pattern[row, col] <- self$pattern[row, col]
             }
           else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
@@ -149,17 +150,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         }
       }
 
-
-          ## RULE TO ADD FOR SPECIATION
-          #'
-          #' check if alive, we cant have a death and speciation at the same time
-          #' when its dead, let the neighbour colonize the space
-          #' so for 0.1 --> check on daily 10
-
-
-          ## RULE TO ADD FOR MIGRATION
-
-          # Maybe too simple, does not count in the death state, NOT A PRIORITY
+          # does not count in the death state, NOT A PRIORITY
           # death state = empty cell (perturbation, dead tree, etc)
 
       if(save){
@@ -179,14 +170,15 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     birth_rate = 0.2,
     #' @field migration_rate The reproduction rate of an individual.
     #' Default is `0.05`
-    migration_rate = 0.05,
+    migration_rate = 0.005,
     #' @field speciation_rate The reproduction rate of an individual.
     #' Default is `0.0001`
     speciation_rate = 0.001,
     #' @field community The local community
     local_cm = NULL,
-    #' @field new_sp Iteration number on speciation
-    #' Start from 1,
+    #' @field metacom The meta community
+    meta_cm = NULL,
+    #' @field new_sp Iteration number on speciation to create a new species each time
     new_sp = 1,
 
     #' @description
@@ -212,11 +204,12 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       #            meaning : the model that will plot, the local community, the meta community
 
       # We're creating the local community model
-      self$local_cm <- local_pc$new(death_rate = self$death_rate, birth_rate = self$birth_rate, draw = TRUE)
-      print("its ok here")
-
+      self$local_cm <- local_pc$new(death_rate = self$death_rate, draw = TRUE)
       self$pattern <- self$local_cm$the_matrix
-      print("its ok here too")
+      print("local_cm works")
+
+      self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)
+      print("meta_cm works")
       # TODO Check if there's no given pattern first - Generally from a community created prior the model
       # if(is.null(self$pattern) == FALSE)
       # {
@@ -226,42 +219,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       #   print("pattern set from outside model")
       # }
     },
-
-    #' @description
-    #' Redraw the model with new values of communities
-    #' TODO : it should call set_values and draw_matrix
-    #'        call make_local(draw = T) if the option is available
-    #'
-    #' TODO : add option to modify value of model ?
-    # redraw = function(
-    #   nx = 20,
-    #   ny = nx,
-    #   S = 2,
-    #   Distribution = "lnorm",
-    #   sd = 1,
-    #   prob = 0.1,
-    #   alpha = 40) {
-    #   self$local_cm$set_values(
-    #     nx = self$local_cm$nx,
-    #     ny = self$local_cm$ny,
-    #     S = self$local_cm$S,
-    #     Distribution = self$local_cm$Distribution,
-    #     sd = self$local_cm$sd,
-    #     prob = self$local_cm$prob,
-    #     alpha = self$local_cm$alpha)
-    #   self$pattern <- self$local_cm$the_matrix
-    #   },
-
-    ## TODO : delete ?
-    #' #' @description
-    #' #' Change the demographic rates
-    #' #' `death_rate`, `birth_rate` and `migration_rate`(unused for now)
-    #' set_rate = function(
-    #' death_rate = 0.1,
-    #' birth_rate = 0.2) {
-    #'   death_rate = death_rate
-    #'   birth_rate = birth_rate
-    #' },
 
 
     ## TODO NA : once all is clean, try it
