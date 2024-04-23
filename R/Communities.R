@@ -95,7 +95,7 @@ community_param <- R6::R6Class("community_param",
         nrow = self$ny,
         ncol = self$nx
       )
-      # are we sure we need to add that name ?
+      # are we sure we need to add that name ? this is confusing rn
       # i can send the_matrix right away and let the next function deal with it
 #-----class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       print("draw_matrix called")
@@ -125,7 +125,7 @@ local_pc <- R6::R6Class("local_pc",
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
-    #' TODO N/A : add more ecological rates
+    #' TODO : add more ecological rates
     #'            do a documentation on it, its a bit confusing right now
     initialize = function(
         death_rate = self$death_rate,
@@ -142,7 +142,7 @@ local_pc <- R6::R6Class("local_pc",
 
     #' @description
     #' Local community default community drawing - add death/birth_rate in the matrix
-    #' TODO 19/04 : Verify if defaulting values in argument is right
+    #' TODO : Verify if defaulting values in argument is right
     #'              I could do an option and make a set_value ?
     #'              strengthen the code, verify if the rates are on same level IN the matrix
     make_local = function(
@@ -157,7 +157,8 @@ local_pc <- R6::R6Class("local_pc",
     birth_rate = 0.2,
     draw = FALSE) {
       # We're NOT drawing the matrix
-      # if .... TODO : that's confusing here
+      # if ....
+      # TODO : that's confusing here, i actually forgot why i have the draw condition
       if (draw == FALSE)
       self$set_values(nx = self$nx, ny = self$ny, S = self$S,
                        Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
@@ -168,7 +169,7 @@ local_pc <- R6::R6Class("local_pc",
       # We're drawing the matrix with the previous values, matrix is NULL before that
       self$the_matrix <- self$draw_matrix()
 
-      # remove the first str from the inherit
+      # remove the first str from the inherit but is that necessary to have that ?
 
 #-----class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
 
@@ -228,15 +229,19 @@ meta_pc <- R6::R6Class("meta_pc",
         ny = nx
         warning("Too large number, defaulted back to the max allowed")
       }
+      # is that matrix nullification necessary ?
       self$the_matrix <- NULL
       self$set_values(nx = nx, ny = ny, S = S,
                       Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+      # TODO KEep these lines til I figure out why I wrote them in local_pc
       # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
       #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
       # Make the matrix
       self$the_matrix <- self$draw_matrix()
-      # remove the first str from the inherit
+
+      # remove the first str from the inherit but is that necessary to have that ?
 #-----class(self$the_matrix) <- c("make_meta", class(self$the_matrix), migration_rate)
+
       print("make_meta called")
       return(self$the_matrix)
     }

@@ -126,23 +126,21 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       self$prepare_buffer()
 
       # Change cells
-
-          ## RULE FOR DEMOGRAPHIC DRIFT
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
-          # Roll a dice between 0 and 1, if the roll is lower than drate, then run it
+          # Roll a dice between 0 and 1, if the roll is lower than rate, then run it
           if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-            # something about adding a new cell type
+            # Create a new species with the new_sp incrementator (might put it in relation with meta's N)
             self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
             self$new_sp <- self$new_sp + 1
             print(self$new_sp)
             # issue here is that upon new species count, colors will changes, its ... not good
             }
           else if (runif(1, 0, 1) < self$migration_rate) {
-            print("immigration") # something about sampling from meta com
+            # Sample from the meta community matrix
             self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
-            # self$pattern[row, col] <- self$pattern[row, col]
-            }
+          }
+          # death rate is removed from the spc and migration rate as we already assume death here
           else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           else
@@ -150,21 +148,18 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         }
       }
 
-          # does not count in the death state, NOT A PRIORITY
-          # death state = empty cell (perturbation, dead tree, etc)
-
       if(save){
         #Save the new pattern
         self$run_patterns[, , which(self$timeline == time)] <- self$pattern
       }
     }
-    # },
-    # dice = function(){return(runif(1, 0, 1))}
   ),
   public = list(
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
+    # I dont think brate is necessary unless we have an empty state to colonize
+    # but it wouldn't be a zero-sum area theory
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
     birth_rate = 0.2,
@@ -183,12 +178,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
-    #' What it does : default the values
-    #'                check if pattern is empty (no argument given)
-    #'                else
-    #'                create new community (local_cm), by default, draw it
-    #'                send the resulting matrix to pattern
-    #' TODO
     initialize = function(
         pattern = NULL,
         timeline = 0,
@@ -200,7 +189,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         type = type,
         neighborhood = neighborhood
       )
-      # TODO N/A : add whatever I want here when I create a neutral theory model
+      # TODO : add whatever I want here when I create a neutral theory model
       #            meaning : the model that will plot, the local community, the meta community
 
       # We're creating the local community model
@@ -210,18 +199,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)
       print("meta_cm works")
-      # TODO Check if there's no given pattern first - Generally from a community created prior the model
-      # if(is.null(self$pattern) == FALSE)
-      # {
-      #   ## check typing, we need something that fit $pattern and send an error otherwise
-      #   ## if.matrix == TRUE maybe
-      #   self$pattern <- pattern
-      #   print("pattern set from outside model")
-      # }
     },
 
 
-    ## TODO NA : once all is clean, try it
+    ## TODO : once all is clean and working, try it
     ## Not the priority, first finish classes, then meta community
     ## Only then, we can explore how to display results
     #' @description
