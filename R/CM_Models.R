@@ -132,8 +132,11 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         for(col in seq(ncol(self$pattern))) {
           # Roll a dice between 0 and 1, if the roll is lower than drate, then run it
           if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-            print("speciation") # something about adding a new cell type
-            self$pattern[row, col] <- self$pattern[row, col]
+            # something about adding a new cell type
+            self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
+            self$new_sp <- self$new_sp + 1
+            print(self$new_sp)
+            # issue here is that upon new species count, colors will changes, its ... not good
             }
           else if (runif(1, 0, 1) < self$migration_rate) {
             print("immigration") # something about sampling from meta com
@@ -178,10 +181,13 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' Default is `0.05`
     migration_rate = 0.05,
     #' @field speciation_rate The reproduction rate of an individual.
-    #' Default is `0.001`
+    #' Default is `0.0001`
     speciation_rate = 0.001,
     #' @field community The local community
     local_cm = NULL,
+    #' @field new_sp Iteration number on speciation
+    #' Start from 1,
+    new_sp = 1,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
