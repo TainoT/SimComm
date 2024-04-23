@@ -131,10 +131,21 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
           # Roll a dice between 0 and 1, if the roll is lower than drate, then run it
-          if (isFALSE(runif(1, 0, 1) < self$death_rate))
+          if (runif(1, 0, 1) > 1 - self$speciation_rate) {
+            print("speciation") # something about adding a new cell type
+            self$pattern[row, col] <- self$pattern[row, col]
+            }
+          else if (runif(1, 0, 1) < self$migration_rate) {
+            print("immigration") # something about sampling from meta com
+            self$pattern[row, col] <- self$pattern[row, col]
+            }
+          else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           else
             self$pattern[row, col] <- self$pattern[row, col]
+        }
+      }
+
 
           ## RULE TO ADD FOR SPECIATION
           #'
@@ -147,22 +158,28 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
           # Maybe too simple, does not count in the death state, NOT A PRIORITY
           # death state = empty cell (perturbation, dead tree, etc)
-        }
-      }
 
       if(save){
         #Save the new pattern
         self$run_patterns[, , which(self$timeline == time)] <- self$pattern
       }
     }
+    # },
+    # dice = function(){return(runif(1, 0, 1))}
   ),
   public = list(
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
-    death_rate = 0.9,
+    death_rate = 0.1,
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
     birth_rate = 0.2,
+    #' @field migration_rate The reproduction rate of an individual.
+    #' Default is `0.05`
+    migration_rate = 0.05,
+    #' @field speciation_rate The reproduction rate of an individual.
+    #' Default is `0.001`
+    speciation_rate = 0.001,
     #' @field community The local community
     local_cm = NULL,
 

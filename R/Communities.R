@@ -105,7 +105,7 @@ community_param <- R6::R6Class("community_param",
 
 #' Local
 #'
-#'
+#' @export
 local_pc <- R6::R6Class("local_pc",
   inherit = community_param,
   private = list(
@@ -157,12 +157,12 @@ local_pc <- R6::R6Class("local_pc",
     draw = FALSE) {
       # We're NOT drawing the matrix
       # if .... TODO : that's confusing here
-      # if (draw == FALSE)
+      if (draw == FALSE)
       self$set_values(nx = self$nx, ny = self$ny, S = self$S,
                        Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
-      # else
-      #   self$set_values(nx = nx, ny = ny, S = S,
-      #                    Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+      else
+        self$set_values(nx = nx, ny = ny, S = S,
+                         Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
 
       # We're drawing the matrix with the previous values, matrix is NULL before that
       self$the_matrix <- self$draw_matrix()
@@ -178,7 +178,9 @@ local_pc <- R6::R6Class("local_pc",
 # TODO for 19/04, keep working on making sure this code is rock solid, then open up to meta community
 # with options and all that
 
-
+#' Meta community
+#'
+#' @export
 meta_pc <- R6::R6Class("meta_pc",
   inherit = community_param,
   private = list(
@@ -194,8 +196,6 @@ meta_pc <- R6::R6Class("meta_pc",
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
-    #' TODO N/A : add more ecological rates
-    #'            do a documentation on it, its a bit confusing right now
     initialize = function(
         migration_rate = self$migration_rate,
         speciation_rate = self$speciation_rate,
@@ -222,22 +222,16 @@ meta_pc <- R6::R6Class("meta_pc",
     migration_rate = 0.1,
     speciation_rate = 0.2,
     draw = FALSE) {
-      # We're NOT drawing the matrix
-      # if .... TODO : that's confusing here
-      # if (draw == FALSE)
+      # Register new values for attributes before making matrix
       self$set_values(nx = self$nx, ny = self$ny, S = self$S,
                       Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
-      # else
-      #   self$set_values(nx = nx, ny = ny, S = S,
-      #                    Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
-
-      # We're drawing the matrix with the previous values, matrix is NULL before that
+      # Make the matrix
       self$the_matrix <- self$draw_matrix()
 
       # remove the first str from the inherit
       class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
       print("make_local called")
       return(self$the_matrix)
-    }
-                        )
+      }
+    )
 )
