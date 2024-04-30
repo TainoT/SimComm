@@ -289,7 +289,7 @@ community_spcmodel <- R6::R6Class("community_spcmodel",
      if (which.marks == "PointType") {
        spatstat.geom::marks(self$tess) <- self$saved_pattern(time)$marks$PointType
        plot(self$tess, do.col = TRUE, ...)
-       graphics::points(myModel$pattern$x, myModel$pattern$y)
+       # graphics::points(myModel$pattern$x, myModel$pattern$y)
      } else {
        plot(self$saved_pattern(time), which.marks = which.marks, ...)
      }

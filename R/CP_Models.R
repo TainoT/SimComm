@@ -35,7 +35,7 @@ cp_drift <- R6::R6Class("cp_drift",
     #' @description
     #' Create a new object.
     initialize = function(
-        pattern = SpatDiv::rSpCommunity(n = 1, size = 100, CheckArguments = FALSE),
+        pattern = SpatDiv::rSpCommunity(n = 1, size = 2, CheckArguments = FALSE),
         timeline = 0,
         type = "Species",
         n_neighbors = 6) {
@@ -59,35 +59,18 @@ cp_hubbell <- R6::R6Class("cp_hubbell",
     neighbors = NULL,
     evolve = function(time, save) {
 
-      # # cp drift is picking one nhood at random, but thats where we're
-      # # rolling with our algo so it should look like
-      # if (runif(1, 0, 1) < self$death_rate)
-      #   chosen_neighbors <- apply(private$neigbors, 1, sample, size = 1)
-      # # that look like a function tho, sorta, that does not make sense
-      #
-      # #how about :
-      # if (runif(1, 0, 1) < self$death_rate)
-      #   self$pattern$marks$PointType <- self$pattern$marks$PointType[chosen_neighbors]
-      # # so what im doing here is
-      # #if the death check is okay--->
-      # # ----> pick from one of the neighbors thanks to the call of chosen_neighbors
-
-      # so removing the double 'for', we have
+      # Change cells
       if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-        # self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
-        #     should look like ....
-        # actually
-        self$pattern$marks$PointType <- self$pattern$marks$PointType[]
+        self$pattern$marks$PointType <- self$pattern$marks$PointType['self$new_sp']
         self$new_sp <- self$new_sp + 1
-        # nothing change
-      }
+        # unclear in bracket, study it up, we have more species, so spnames is bigger
+        # its not spXXXX anymore, we can handle this right
+        }
       else if (runif(1, 0, 1) < self$migration_rate) {
         # Sample from the meta community matrix
-        #       hould that look like ...
         self$pattern$marks$PointType <- self$meta_cp$the_points$marks$PointType[chosen_neighbors]
         # or somehting like that, since pattern is local, we jsut need to look for the class creating our pattern ?
       }
-      # death rate is removed from the spc and migration rate as we already assume death here
       else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
         self$pattern$marks$PointType <- self$pattern$marks$PointType[chosen_neighbors]
         # that one is fine, its just above
@@ -99,31 +82,63 @@ cp_hubbell <- R6::R6Class("cp_hubbell",
         #Save the new pattern
         self$run_patterns[[which(self$timeline == time)]] <- self$pattern
       }
+    },
+    disturb = function(time, save){
+      # keep a counter, we keep deleting cells til its over, we ought to track that
+      # each time we're onto a cell we roll a dice, if its less than 1/J, we can kill the cell
+      # so even if we dont kill the sufficient amount of cells on the first loop of the entire area
+      # we still can keep going and start all over again
+
+      self$pattern$marks$PointType <- NULL # or 0 ?
+
+      if (save){
+        # Save the new pattern
+        self$run_patterns[[which(self$timeline == time)]] <- self$pattern
+      }
     }
-  ),
-  #removing the commentaries here while I do the port
+
+    ),
+
+    # As per the UNTB, there's a component of distrubance to be applied upon the community
+    # the Disturbance rate is removing D individuals in the community
+    # on the next cycle, the dead individuals are replaced by new ones
+    # the new individuals can be drawn from nearby cells or from the meta community
+
+
+  # ),
+
+  #removing the commentaries here while I do the porting
   public = list(
     death_rate = 0.1,
     migration_rate = 0.005,
     speciation_rate = 0.001,
-    local_cm = NULL,
-    meta_cm = NULL,
+    local_cp = NULL,
+    meta_cp = NULL,
     new_sp = 1,
+
+    disturbance_rate = 10,
+
+    #' @field n_neighbors The number of nearest neighbors to take into account.
+    n_neighbors = NULL,
 
     initialize = function(
         pattern = NULL,
         timeline = 0,
         type = "Species",
-        neighborhood = "Moore 1") {
+        n_neighbors = 6) {
       super$initialize(
         pattern = pattern,
         timeline = timeline,
-        type = type,
-        neighborhood = neighborhood
-      )
-      self$local_cp <- local_pc$new(death_rate = self$death_rate, draw = TRUE)
+        type = type)
+      self$n_neighbors <- n_neighbors
+      # Store the neighbors
+      private$neighbors <- self$neighbors_n(self$n_neighbors)
+
+      # Change local_cp to include wmppp
+      self$local_cp <- local_pc$new(death_rate = self$death_rate,
+                                    draw = TRUE, fashion = "wmppp")
       self$pattern <- self$local_cm$the_matrix
-      print("local_cm works")
+      print("local_cm works with wmppp")
 
       #Meta to do later on
       # self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)

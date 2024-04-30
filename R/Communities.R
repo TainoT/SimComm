@@ -41,6 +41,7 @@ community_param <- R6::R6Class("community_param",
     draw = NULL,
 
     the_matrix = NULL,
+    the_wmppp = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -71,11 +72,10 @@ community_param <- R6::R6Class("community_param",
 
     #' @description
     #' Draw a community with no adjectives
-    #' TODO 19/04 : it should work properly, do a verification still, esp the return
-    draw_matrix = function(){#redraw = FALSE){
+    draw_matrix = function(){
       the_community <- entropart::rCommunity(
       1,
-      #bit64::as.integer64 is an option here
+      #bit64::as.integer64 is an option here if we want to handle bigger numbers
       size = 100 * self$nx * self$ny,
       S = self$S,
       Distribution = self$Distribution,
@@ -85,9 +85,10 @@ community_param <- R6::R6Class("community_param",
       CheckArguments = FALSE
     )
       # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
+      # while it affects graphics, verify affects on plots, thats more important
       spNames <- seq(length(the_community))
       # Make a matrix, thats the matrix we sending and that should be studied
-      #if (redraw == TRUE)
+      # TODO : scrap that out for the meta com, i think, check performances
       self$the_matrix <- NULL
       self$the_matrix <- matrix(
         sample(spNames, size = self$nx * self$ny, replace = TRUE,
@@ -100,7 +101,31 @@ community_param <- R6::R6Class("community_param",
 #-----class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       print("draw_matrix called")
       return(self$the_matrix)
+    },
+
+    #' @description
+    #' Draw a wmppp community with no adjective
+    draw_wmppp = function(){
+      spNames <- seq(self$S)
+      the_community <- SpatDiv::rSpCommunity(
+        1,
+        size = 100 * self$nx * self$ny,
+        S = self$S,
+        Distribution = self$Distribution,
+        sd = self$sd,
+        prob = self$prob,
+        alpha = self$alpha,
+        CheckArguments = FALSE
+      )
+      self$the_wmppp <- the_community
+      # self$the_wmpp <- matrix()
+      print("draw_wmppp called")
+      return(self$the_wmppp)
+      # self$the_wmppp <- the_community
+      #I feel like the function just stop there
     }
+
+
   )
 )
 
@@ -127,16 +152,22 @@ local_pc <- R6::R6Class("local_pc",
     #' Create a new instance of this [R6][R6::R6Class] class.
     #' TODO : add more ecological rates
     #'            do a documentation on it, its a bit confusing right now
-    initialize = function(
+    initialize = function(fashion = "matrix",
         death_rate = self$death_rate,
         speciation_rate = self$speciation_rate,
         draw = FALSE){
       self$death_rate <- death_rate
       self$speciation_rate <- speciation_rate
-      if (draw){
-        self$the_matrix <- self$make_local(draw = draw)
-        print("true")
+      if (draw & fashion == "matrix"){
+        print("into matrix")
+        self$the_matrix <- self$make_local(draw = draw, fashion = fashion)
       }
+      else if (draw & fashion == "wmppp") {
+        print("into wmppp")
+        self$the_wmppp <- self$make_local(draw = draw, fashion = fashion)
+      }
+      else
+        stop("No defined fashion")
       print("local community is created")
     },
 
@@ -155,9 +186,9 @@ local_pc <- R6::R6Class("local_pc",
     theta = 40,
     death_rate = 0.1,
     birth_rate = 0.2,
-    draw = FALSE) {
+    draw = FALSE,
+    fashion = "matrix") {
       # We're NOT drawing the matrix
-      # if ....
       # TODO : that's confusing here, i actually forgot why i have the draw condition
       if (draw == FALSE)
       self$set_values(nx = self$nx, ny = self$ny, S = self$S,
@@ -167,15 +198,17 @@ local_pc <- R6::R6Class("local_pc",
                          Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
 
       # We're drawing the matrix with the previous values, matrix is NULL before that
-      self$the_matrix <- self$draw_matrix()
-
-      # remove the first str from the inherit but is that necessary to have that ?
-
-#-----class(self$the_matrix) <- c("make_local", class(self$the_matrix), death_rate, birth_rate)
-
-      print("make_local called")
-      return(self$the_matrix)
-    }
+      if (isTRUE(fashion == "matrix")){
+        self$the_matrix <- self$draw_matrix()
+        return(self$the_matrix)
+      }
+      else if (isTRUE(fashion == "wmppp")){
+        self$the_wmppp <- self$draw_wmppp()
+        return(self$the_wmppp)
+      }
+      else
+        stop("No defined fashion")
+     }
   )
 )
 

@@ -169,7 +169,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field speciation_rate The reproduction rate of an individual.
     #' Default is `0.0001`
     speciation_rate = 0.001,
-    #' @field community The local community
+    #' @field community The matrix local community
     local_cm = NULL,
     #' @field metacom The meta community
     meta_cm = NULL,
