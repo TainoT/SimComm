@@ -106,10 +106,13 @@ community_param <- R6::R6Class("community_param",
     #' @description
     #' Draw a wmppp community with no adjective
     draw_wmppp = function(){
+      print(self$nx)
+      print(self$ny)
+      print(self$S)
       spNames <- seq(self$S)
       the_community <- SpatDiv::rSpCommunity(
         1,
-        size = 100 * self$nx * self$ny,
+        size = self$nx * self$ny,#100 * self$nx * self$ny,
         S = self$S,
         Distribution = self$Distribution,
         sd = self$sd,
@@ -117,12 +120,13 @@ community_param <- R6::R6Class("community_param",
         alpha = self$alpha,
         CheckArguments = FALSE
       )
+
+      # TODO I need to SAMPLE the community from 100 * x * y to a size of 100
       self$the_wmppp <- the_community
       # self$the_wmpp <- matrix()
       print("draw_wmppp called")
       return(self$the_wmppp)
       # self$the_wmppp <- the_community
-      #I feel like the function just stop there
     }
 
 

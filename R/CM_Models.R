@@ -141,8 +141,9 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
             self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
           }
           # death rate is removed from the spc and migration rate as we already assume death here
-          else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
+          else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate)) {
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
+          }
           else
             self$pattern[row, col] <- self$pattern[row, col]
         }
@@ -194,11 +195,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       # We're creating the local community model
       self$local_cm <- local_pc$new(death_rate = self$death_rate, draw = TRUE)
+      # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
-      print("local_cm works")
 
       self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)
-      print("meta_cm works")
     },
 
 

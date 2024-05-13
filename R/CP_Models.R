@@ -59,22 +59,27 @@ cp_hubbell <- R6::R6Class("cp_hubbell",
     neighbors = NULL,
     evolve = function(time, save) {
 
+      chosen_neighbors <- apply(private$neighbors, 1, sample, size=1)
+
       # Change cells
-      if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-        self$pattern$marks$PointType <- self$pattern$marks$PointType['self$new_sp']
-        self$new_sp <- self$new_sp + 1
-        # unclear in bracket, study it up, we have more species, so spnames is bigger
-        # its not spXXXX anymore, we can handle this right
-        }
-      else if (runif(1, 0, 1) < self$migration_rate) {
-        # Sample from the meta community matrix
-        self$pattern$marks$PointType <- self$meta_cp$the_points$marks$PointType[chosen_neighbors]
-        # or somehting like that, since pattern is local, we jsut need to look for the class creating our pattern ?
-      }
-      else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate))
-        self$pattern$marks$PointType <- self$pattern$marks$PointType[chosen_neighbors]
-        # that one is fine, its just above
-      else
+      # if (runif(1, 0, 1) > 1 - self$speciation_rate) {
+      #   self$pattern$marks$PointType <- self$pattern$marks$PointType['self$new_sp']
+      #   self$new_sp <- self$new_sp + 1
+      #   # unclear in bracket, study it up, we have more species, so spnames is bigger
+      #   # its not spXXXX anymore, we can handle this right
+      #   }`
+
+
+      # if (runif(1, 0, 1) < self$migration_rate) {
+      #   # Sample from the meta community matrix
+      #   self$pattern$marks$PointType <- self$meta_cp$the_points$marks$PointType[chosen_neighbors]
+      #   # or somehting like that, since pattern is local, we jsut need to look for the class creating our pattern ?
+      # }
+      # else if (runif(1, 0, 1) < self$death_rate - (self$migration_rate))
+      #   self$pattern$marks$PointType <- self$pattern$marks$PointType[chosen_neighbors]
+      #   # that one is fine, its just above
+      # else
+      self$pattern$marks$PointType <- self$pattern$marks$PointType[chosen_neighbors]
         # self$pattern[row, col] <- self$pattern[row, col]
 
 
@@ -130,15 +135,19 @@ cp_hubbell <- R6::R6Class("cp_hubbell",
         pattern = pattern,
         timeline = timeline,
         type = type)
+      print(self$pattern)
       self$n_neighbors <- n_neighbors
       # Store the neighbors
       private$neighbors <- self$neighbors_n(self$n_neighbors)
 
-      # Change local_cp to include wmppp
+      # We're creating a local point community
+
       self$local_cp <- local_pc$new(death_rate = self$death_rate,
                                     draw = TRUE, fashion = "wmppp")
-      self$pattern <- self$local_cm$the_matrix
-      print("local_cm works with wmppp")
+
+      # self$pattern <- self$local_cp$the_wmppp
+
+      print("local_pc works with wmppp")
 
       #Meta to do later on
       # self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)

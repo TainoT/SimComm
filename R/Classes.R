@@ -478,6 +478,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
     #' "Moore 2" or "24" for two rings of neighbors.
     neighborhood = NULL,
+    # the_neighbors = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -487,7 +488,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         type = "Species",
         neighborhood = "von Neumann 1") {
       super$initialize(pattern=pattern, timeline=timeline, type=type)
-      if (neighborhood %in% c("von Neumann 1", "4", "Moore 1", "8", "Moore 2", "24")) {
+      if (neighborhood %in% c("von Neumann 1", "4", "Moore 1", "8", "Moore 2", "24", "Global", "0")) {
         self$neighborhood <- neighborhood
       } else {
         self$neighborhood <- "von Neumann 1"
@@ -526,11 +527,15 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
           private$buffered_pattern, private$buffered_pattern[1:2, ]
         )
       }
+      if(self$neighborhood == "Global" | self$neighborhood == "0") {
+        private$buffered_pattern <- self$pattern
+      }
     },
 
     #' @description
     #' Return the vector of neighbors of a cell, defined by it row and column
     neighbors = function(row, col) {
+      the_neighbors <- c()
       if(self$neighborhood == "von Neumann 1" | self$neighborhood == "4") {
         the_neighbors <- c(
           private$buffered_pattern[row,     col + 1],
@@ -547,6 +552,15 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         the_neighbors <- as.vector(
           private$buffered_pattern[row:(row + 4), col:(col + 4)]
         )[-13]
+      }
+      if (self$neighborhood == "Global" | self$neighborhood == "0") {
+        for(x in seq(nrow(private$buffered_pattern))) {
+          for(y in seq(ncol(private$buffered_pattern))) {
+            if (x == row && y == col) {
+              next}
+            the_neighbors <- c(the_neighbors, private$buffered_pattern[row, col])
+          }
+        }
       }
       return(the_neighbors)
     },
