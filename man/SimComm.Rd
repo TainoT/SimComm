@@ -2,8 +2,8 @@
 % Please edit documentation in R/Project.R
 \docType{package}
 \name{SimComm}
-\alias{SimComm}
 \alias{SimComm-package}
+\alias{SimComm}
 \title{SimComm}
 \description{
 Community simulator.
@@ -18,6 +18,7 @@ This is a classical approach in community ecology modeling or agent based models
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://ericmarcon.github.io/SimComm}
   \item \url{https://github.com/EricMarcon/SimComm}
   \item Report bugs at \url{https://github.com/EricMarcon/SimComm/issues}
 }

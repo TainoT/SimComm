@@ -7,6 +7,7 @@
 \alias{pattern_matrix_logical}
 \alias{pm_Conway_blinker}
 \alias{pm_Conway_glider}
+\alias{pattern_matrix_species}
 \title{Pattern}
 \usage{
 pattern_grid(
@@ -34,6 +35,16 @@ pattern_matrix_logical(nx = 8, ny = nx, prob = 0.5)
 pm_Conway_blinker()
 
 pm_Conway_glider(nx = 50, ny = nx)
+
+pattern_matrix_species(
+  nx = 32,
+  ny = nx,
+  S = 2,
+  Distribution = "lnorm",
+  sd = 1,
+  prob = 0.1,
+  alpha = 40
+)
 }
 \arguments{
 \item{nx}{The number of X values (columns) of the grid or the matrix.}
