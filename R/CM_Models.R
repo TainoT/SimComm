@@ -129,19 +129,18 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
           # Roll a dice between 0 and 1, if the roll is lower than rate, then run it
-          if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-            # Create a new species with the new_sp incrementator (might put it in relation with meta's N)
-            self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
-            self$new_sp <- self$new_sp + 1
-            print(self$new_sp)
-            # issue here is that upon new species count, colors will changes, its ... not good
-            }
-          else if (runif(1, 0, 1) < self$migration_rate) {
+          # if (runif(1, 0, 1) > 1 - self$speciation_rate) {
+          #   # Create a new species with the new_sp incrementator (might put it in relation with meta's N)
+          #   self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
+          #   self$new_sp <- self$new_sp + 1
+          #   # issue here is that upon new species count, colors will changes, its ... not good
+          #   }
+          if (runif(1, 0, 1) < self$migration_rate) {
             # Sample from the meta community matrix
             self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
           }
           # death rate is removed from the spc and migration rate as we already assume death here
-          else if (runif(1, 0, 1) < self$death_rate - (self$speciation_rate + self$migration_rate)) {
+          else if (runif(1, 0, 1) < self$death_rate - self$migration_rate) {
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           }
           else
@@ -151,6 +150,35 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       if(save){
         #Save the new pattern
+        self$run_patterns[, , which(self$timeline == time)] <- self$pattern
+      }
+    },
+
+    #' @description
+    disturb = function(time, save) {
+      dead_c <- 0
+      # Prepare the buffer
+      self$prepare_buffer()
+
+      # Store matrix in pattern
+      self$pattern <- self$local_cm$the_matrix
+
+      # Make n cell in pattern as NA
+      # TODO change up 36 to something the user can modify
+      self$pattern[sample(1:length(self$pattern), 36)] <- 0
+      # dead_c <- sample(self$pattern, size = 36)
+
+      # Change cells to fill the NA with the neighbors
+      for (row in seq(nrow(self$pattern))) {
+        for (col in seq(ncol(self$pattern))) {
+          if (isTRUE(self$pattern[row, col] == 0)) {
+            self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
+          }
+        }
+      }
+
+      if(save) {
+        # Save the new pattern
         self$run_patterns[, , which(self$timeline == time)] <- self$pattern
       }
     }
@@ -176,6 +204,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     meta_cm = NULL,
     #' @field new_sp Iteration number on speciation to create a new species each time
     new_sp = 1,
+    species_count = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -201,18 +230,23 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)
     },
 
-
     ## TODO : once all is clean and working, try it
     ## Not the priority, first finish classes, then meta community
     ## Only then, we can explore how to display results
     #' @description
     #' Draw the abundance of each species over time
-    plot_line = function() {
-      plot(self$along_time(entropart::Richness, Correction = "None", CheckArguments = F), type = "l")
-      #the_plotline <- data.frame(self$timeline, self$saved_pattern(self$timeline))
+    #  count the number of occurence of each species over time and plot it
+    #     plot_abundance = function() {
+    #       self$count_species()
+    #       plot(self$species_count, type = "l", xlab = "Species", ylab = "Abundance")
+    # }
 
-      # ggplot(the_plotline, aes(x = self$timeline, y = self$saved_pattern(timeline))) +
-      #   geom_line()
-      }
- )
+    #' @description
+    #' DRAFT
+    #' TODO
+    count_species = function() {
+      self$species_count <- table(unlist(self$run_patterns))
+    }
 )
+)
+

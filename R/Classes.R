@@ -63,6 +63,16 @@ community_model <- R6::R6Class("community_model",
         # Save the new pattern
         self$run_patterns[[which(self$timeline == time)]] <- self$pattern
       }
+    },
+
+    disturb = function(time, save) {
+      # Code to disturb self$pattern at time.
+      ## Here
+      # Last step: save the pattern.
+      if(save) {
+        # Save the new pattern
+        self$run_patterns[[which(self$timeline == time)]] <- self$pattern
+      }
     }
   ),
 
@@ -150,7 +160,18 @@ community_model <- R6::R6Class("community_model",
       private$prepare_to_save(save, more_time)
       # Run the remaining timeline
       for(time in self$timeline[self$timeline > self$last_time]) {
-        private$evolve(time, save)
+        # in there, i can add conditions for disturbance at each time step
+        # as evolve is limited to local community
+        # create another private methode that call for mutation
+        # if we have a disturbance, no need to run evolve on the same step
+        # when disturbance, make cells at state 0 or NA
+        # adapt evolve to NOT include NA in the calculation of neighbours
+        # sample(x[!is.na(x)], 1)
+        #
+        if (time == 10)
+          private$disturb(time, save)
+        else
+          private$evolve(time, save)
         self$last_time <- time
         if(animate) {
           self$plot(main=paste("Time:", time), sleep = sleep)
@@ -603,5 +624,25 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         return(the_plot)
       }
     }
+
+    #' #' @description
+    #' #' Produce a graph of the abundance of each type of individual along time.
+    #' #' @param ... Extra arguments to be passed to methods.
+    #' #' @return A ggplot2 object.
+    #' plotabundance = function(...) {
+    #'   the_df <- self$along_time(
+    #'     function(pattern) {
+    #'       table(as.vector(pattern))
+    #'     }
+    #'   )
+    #'   the_plot <- ggplot2::ggplot(
+    #'     data = the_df,
+    #'     ggplot2::aes(x = .data$x, y = .data$y)
+    #'   ) +
+    #'     ggplot2::geom_point() +
+    #'     ggplot2::labs(x = "Time", y = "Abundance")
+    #'   return(the_plot)
+    #' }
+
   )
 )
