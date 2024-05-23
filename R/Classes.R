@@ -499,6 +499,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
     #' "Moore 2" or "24" for two rings of neighbors.
     neighborhood = NULL,
+    data_gen = NULL,
     # the_neighbors = NULL,
 
     #' @description
@@ -623,26 +624,48 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
           ggplot2::labs(fill = self$type)
         return(the_plot)
       }
+    },
+
+    #' @description
+    #' Produces the graphs
+    graph = function(keep = NULL, graph = NULL, ...) {
+      if(is.null(self$run_patterns)) {
+        stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
+      }
+
+            data_list <- list()
+      for(i in 1:(length(self$timeline)-1)) {
+        species_data <- as.data.frame(table(self$saved_pattern(i)))
+        species_data$time <- i
+        data_list[[i]] <- species_data
+      }
+      temp <- do.call(rbind, data_list)
+      colnames(temp) <- c("species", "count", "time")
+      temp$species <- as.numeric(as.character(temp$species))
+      temp$count <- as.numeric(as.character(temp$count))
+      temp$time <- as.numeric(temp$time)
+      temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
+
+      self$data_gen <- temp
+      if (isTRUE(keep)) {
+        print("writing data_gen.csv")
+        write.csv(self$data_gen, "data_gen.csv")
+      }
+
+
+      # TODO : make it more user friendly maybe
+      if (is.null(graph) || isTRUE(graph == "overall_abundance_rank")) {
+        overall_abundance_rank(data = self$data_gen)
+      }
+      else if (isTRUE(graph == "timed_abundance")) {
+        timed_abundance(time = 10, data = self$data_gen)
+      }
+      else if (isTRUE(graph == "timed_relative_abundance")) {
+        timed_relative_abundance(time = 10, data = self$data_gen)
+      }
+      else if (graph == "overall_abundance_distribution") {
+        overall_abundance_distribution(data = self$data_gen)
+      }
     }
-
-    #' #' @description
-    #' #' Produce a graph of the abundance of each type of individual along time.
-    #' #' @param ... Extra arguments to be passed to methods.
-    #' #' @return A ggplot2 object.
-    #' plotabundance = function(...) {
-    #'   the_df <- self$along_time(
-    #'     function(pattern) {
-    #'       table(as.vector(pattern))
-    #'     }
-    #'   )
-    #'   the_plot <- ggplot2::ggplot(
-    #'     data = the_df,
-    #'     ggplot2::aes(x = .data$x, y = .data$y)
-    #'   ) +
-    #'     ggplot2::geom_point() +
-    #'     ggplot2::labs(x = "Time", y = "Abundance")
-    #'   return(the_plot)
-    #' }
-
   )
 )
