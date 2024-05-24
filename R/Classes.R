@@ -666,6 +666,9 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
       else if (graph == "overall_abundance_distribution") {
         overall_abundance_distribution(data = self$data_gen)
       }
+      else if (graph == "relative_abundance_rank") {
+        relative_abundance_rank(data = self$data_gen)
+      }
     }
   )
 )
