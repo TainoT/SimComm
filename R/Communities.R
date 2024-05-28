@@ -70,6 +70,18 @@ community_param <- R6::R6Class("community_param",
       self$alpha = alpha
     },
 
+    show_values = function() {
+    values <- paste(class(self)[1],
+                "\nnx : ", self$nx,
+                " | ny : ", self$ny,
+                "\nS : ", self$S,
+                "\nDistribution : ", self$Distribution,
+                " | sd : ", self$sd,
+                " | prob : ", self$prob,
+                "\nalpha : ", self$alpha)
+    cat(values)
+    },
+
     #' @description
     #' Draw a community with no adjectives
     draw_matrix = function(){
@@ -150,18 +162,22 @@ local_pc <- R6::R6Class("local_pc",
     birth_rate = 0.22,
     #' @field speciation_rate The speciation rate of an individual
     #' Default is `0.00001`
-    speciation_rate = 0.00001,
+    #' TODO : send that to meta_pc
+    #'        however add an immigration rate
+    #'        immigration rate should be involved only if we have a meta community
+    #-- speciation_rate = 0.00001,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
     #' TODO : add more ecological rates
     #'            do a documentation on it, its a bit confusing right now
+    #'        draw does not have a catch
     initialize = function(fashion = "matrix",
         death_rate = self$death_rate,
-        speciation_rate = self$speciation_rate,
+        #-- speciation_rate = self$speciation_rate,
         draw = FALSE){
       self$death_rate <- death_rate
-      self$speciation_rate <- speciation_rate
+      #-- self$speciation_rate <- speciation_rate
       if (draw & fashion == "matrix"){
         print("into matrix")
         self$the_matrix <- self$make_local(draw = draw, fashion = fashion)
@@ -183,7 +199,7 @@ local_pc <- R6::R6Class("local_pc",
     make_local = function(
     nx = 10,
     ny = nx,
-    S = 2,
+    S = 10,
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
@@ -194,12 +210,15 @@ local_pc <- R6::R6Class("local_pc",
     fashion = "matrix") {
       # We're NOT drawing the matrix
       # TODO : that's confusing here, i actually forgot why i have the draw condition
+      #        oh, when draw = false, im taking default values, else, im taking from model
       if (draw == FALSE)
       self$set_values(nx = self$nx, ny = self$ny, S = self$S,
-                       Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
+                      Distribution = self$Distribution, sd = self$sd,
+                      prob = self$prob, alpha = self$theta)
       else
         self$set_values(nx = nx, ny = ny, S = S,
-                         Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+                        Distribution = Distribution, sd = sd,
+                        prob = prob, alpha = theta)
 
       # We're drawing the matrix with the previous values, matrix is NULL before that
       if (isTRUE(fashion == "matrix")){
@@ -238,11 +257,11 @@ meta_pc <- R6::R6Class("meta_pc",
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(
-        migration_rate = self$migration_rate
-        # speciation_rate = self$speciation_rate,
+        migration_rate = self$migration_rate,
+        speciation_rate = self$speciation_rate
         ){
       self$migration_rate <- migration_rate
-      # self$speciation_rate <- speciation_rate
+      self$speciation_rate <- speciation_rate
       self$the_matrix <- self$make_meta()
       print("meta community is created")
     },
@@ -257,7 +276,8 @@ meta_pc <- R6::R6Class("meta_pc",
     sd = 1,
     prob = 0.1,
     theta = 40,
-    migration_rate = 0.05) {
+    migration_rate = 0.05,
+    speciation_rate = 0.001) {
       # Register new values for attributes before making matrix
       # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
       #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
@@ -269,7 +289,8 @@ meta_pc <- R6::R6Class("meta_pc",
       # is that matrix nullification necessary ?
       self$the_matrix <- NULL
       self$set_values(nx = nx, ny = ny, S = S,
-                      Distribution = Distribution, sd = sd, prob = prob, alpha = theta)
+                      Distribution = Distribution, sd = sd,
+                      prob = prob, alpha = theta)
       # TODO KEep these lines til I figure out why I wrote them in local_pc
       # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
       #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)

@@ -65,7 +65,9 @@ cm_Conway <- R6::R6Class("cm_Conway",
           # Count the neighbors
           n_neighbors <- sum(self$neighbors(row, col))
           # Apply the rule
-          self$pattern[row, col] <- (self$pattern[row, col] & (n_neighbors %in% self$to_survive)) | (!self$pattern[row, col] & (n_neighbors %in% self$to_generate))
+          self$pattern[row, col] <- (self$pattern[row, col] &
+                                       (n_neighbors %in% self$to_survive)) |
+            (!self$pattern[row, col] & (n_neighbors %in% self$to_generate))
         }
       }
 
@@ -156,7 +158,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
     #' @description
     disturb = function(time, save) {
-      dead_c <- 0
+      # dead_c <- 0
       # Prepare the buffer
       self$prepare_buffer()
 
@@ -165,10 +167,11 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       # Make n cell in pattern as NA
       # TODO change up 36 to something the user can modify
+      # why is it 36 again ? is thhat the disturbance rat
       self$pattern[sample(1:length(self$pattern), 36)] <- 0
       # dead_c <- sample(self$pattern, size = 36)
 
-      # Change cells to fill the NA with the neighbors
+      # Change cells to fill the 0 with the neighbors
       for (row in seq(nrow(self$pattern))) {
         for (col in seq(ncol(self$pattern))) {
           if (isTRUE(self$pattern[row, col] == 0)) {
@@ -187,11 +190,11 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
-    # I dont think brate is necessary unless we have an empty state to colonize
+    # TODO: I dont think brate is necessary unless we have an empty state to colonize
     # but it wouldn't be a zero-sum area theory
     #' @field birth_rate The reproduction rate of an individual.
     #' Default is `0.2`
-    birth_rate = 0.2,
+    # birth_rate = 0.2,
     #' @field migration_rate The reproduction rate of an individual.
     #' Default is `0.05`
     migration_rate = 0.005,
@@ -204,17 +207,20 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     meta_cm = NULL,
     #' @field new_sp Iteration number on speciation to create a new species each time
     new_sp = 1,
+    #' @field species_count The number of species at each time
+    #' why did i add that again
     species_count = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(
-        pattern = NULL,
+        local_pattern = NULL,
         timeline = 0,
         type = "Species",
-        neighborhood = "Moore 1") {
+        neighborhood = "Moore 1",
+        global_pattern = NULL) {
       super$initialize(
-        pattern = pattern,
+        pattern = local_pattern,
         timeline = timeline,
         type = type,
         neighborhood = neighborhood
@@ -227,7 +233,9 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
 
-      self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate)
+      # We're creating the meta community model
+      self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
+                                  speciation_rate = self$speciation_rate)
     },
 
     ## TODO : once all is clean and working, try it
