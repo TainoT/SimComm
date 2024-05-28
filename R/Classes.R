@@ -160,6 +160,7 @@ community_model <- R6::R6Class("community_model",
       private$prepare_to_save(save, more_time)
       # Run the remaining timeline
       for(time in self$timeline[self$timeline > self$last_time]) {
+
         # in there, i can add conditions for disturbance at each time step
         # as evolve is limited to local community
         # create another private methode that call for mutation
@@ -167,8 +168,8 @@ community_model <- R6::R6Class("community_model",
         # when disturbance, make cells at state 0 or NA
         # adapt evolve to NOT include NA in the calculation of neighbours
         # sample(x[!is.na(x)], 1)
-        #
-        if (time == 10)
+        # TODO: add a disturbance method
+        if (any(time == c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)))
           private$disturb(time, save)
         else
           private$evolve(time, save)
@@ -436,6 +437,7 @@ community_gridmodel <- R6::R6Class("community_gridmodel",
 #' "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
 #' "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
 #' "Moore 2" or "24" for two rings of neighbors.
+#' "Global" or "0" for all cells.
 #' @param pattern The pattern which describes the location of agents.
 #' @param row The row of the focal cell.
 #' @param save if `TRUE`, the evolution of the model is saved.
@@ -498,6 +500,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
     #' "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
     #' "Moore 2" or "24" for two rings of neighbors.
+    #' "Global" or "0" for all cells.
     neighborhood = NULL,
     data_gen = NULL,
     # the_neighbors = NULL,
@@ -580,11 +583,19 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
           for(y in seq(ncol(private$buffered_pattern))) {
             if (x == row && y == col) {
               next}
-            the_neighbors <- c(the_neighbors, private$buffered_pattern[row, col])
+            the_neighbors <- c(the_neighbors, private$buffered_pattern[x, y])
           }
         }
       }
       return(the_neighbors)
+    },
+
+    #TODO---
+    same_neighbors = function(row, col, species) {
+      # write a function that returns the number of neighbors of the same species
+      # for a given cell
+      the_neighbors <- self$neighbors(row, col)
+      return(sum(the_neighbors == species))
     },
 
     #' @description
@@ -628,23 +639,38 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
 
     #' @description
     #' Produces the graphs
-    graph = function(keep = NULL, graph = NULL, ...) {
+    graph = function(time = 1, graph = NULL, keep = NULL,...) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
 
-            data_list <- list()
+      data_list <- list()
       for(i in 1:(length(self$timeline)-1)) {
         species_data <- as.data.frame(table(self$saved_pattern(i)))
         species_data$time <- i
+
+        #TODO---
+        # uni_species <- unique(self$saved_pattern(i))
+        for (c in species_data[species_data$time == i, "Var1"]) {
+          for (x in 1:nrow(self$saved_pattern(i))) {
+             for (y in 1:ncol(self$saved_pattern(i))) {
+               if (self$saved_pattern(i)[x,y] == c)
+                 species_data$occurence[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) / length(self$neighbors(x, y))
+                 # species_data$occurence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
+             }
+          }
+        }
+        #---
+
         data_list[[i]] <- species_data
       }
       temp <- do.call(rbind, data_list)
-      colnames(temp) <- c("species", "count", "time")
+      colnames(temp) <- c("species", "count", "time")#, "occurence")
       temp$species <- as.numeric(as.character(temp$species))
       temp$count <- as.numeric(as.character(temp$count))
       temp$time <- as.numeric(temp$time)
       temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
+
 
       self$data_gen <- temp
       if (isTRUE(keep)) {
@@ -652,16 +678,22 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         write.csv(self$data_gen, "data_gen.csv")
       }
 
-
       # TODO : make it more user friendly maybe
+      if (is.null(graph) || isTRUE(graph == "all")) {
+        overall_abundance_rank(data = self$data_gen)
+        timed_abundance(time = time, data = self$data_gen)
+        timed_relative_abundance(time = time, data = self$data_gen)
+        overall_abundance_distribution(data = self$data_gen)
+        relative_abundance_rank(data = self$data_gen)
+        }
       if (is.null(graph) || isTRUE(graph == "overall_abundance_rank")) {
         overall_abundance_rank(data = self$data_gen)
       }
       else if (isTRUE(graph == "timed_abundance")) {
-        timed_abundance(time = 10, data = self$data_gen)
+        timed_abundance(time = time, data = self$data_gen)
       }
       else if (isTRUE(graph == "timed_relative_abundance")) {
-        timed_relative_abundance(time = 10, data = self$data_gen)
+        timed_relative_abundance(time = time, data = self$data_gen)
       }
       else if (graph == "overall_abundance_distribution") {
         overall_abundance_distribution(data = self$data_gen)
