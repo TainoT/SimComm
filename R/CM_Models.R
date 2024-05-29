@@ -102,7 +102,6 @@ cm_Conway <- R6::R6Class("cm_Conway",
   )
 )
 
-
 #' Hubbell's Neutral Theory Integration Class
 #'
 #' A [community_matrixmodel] where each cell contains an individual of one species.
@@ -112,17 +111,24 @@ cm_Conway <- R6::R6Class("cm_Conway",
 #' Edge effects are eliminated by a toroidal correction. (??? check that out)
 #'
 #' @docType class
+#' @param neighborhood A character string defining what is the neighborhood of a cell:
+#' "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
+#' "Moore 1 or 8" for all adjacent cells (the first four and North-West, etc.);
+#' "Moore 2 or 24" for two rings of neighbors.
+#' "Global or 0" for the whole matrix as neighborhood.
 #' @param pattern The pattern which describe the location of agents.
 #' @param time The point of the timeline considered.
 #' Its value should be in `timeline`
 #' @param timeline A numeric vector that contains the points of time of interest.
 #' @param type The type of individuals. Information only.
+#'
+#'
 #' @export
 cm_hubbell <- R6::R6Class("cm_hubbell",
   inherit = community_matrixmodel,
   private = list(
-    #' TODO add an option to change the rules on the fly ?
-    #' Realm of Cellular Automata here
+    #' @description
+    #' community evolution rules for the neutral theory model
     evolve = function(time, save) {
       # Prepare the buffer
       self$prepare_buffer()
@@ -131,12 +137,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
           # Roll a dice between 0 and 1, if the roll is lower than rate, then run it
-          # if (runif(1, 0, 1) > 1 - self$speciation_rate) {
-          #   # Create a new species with the new_sp incrementator (might put it in relation with meta's N)
-          #   self$pattern[row, col] <- self$pattern[row, col] + self$new_sp
-          #   self$new_sp <- self$new_sp + 1
-          #   # issue here is that upon new species count, colors will changes, its ... not good
-          #   }
+          #TODO verify if meta community is not empty
           if (runif(1, 0, 1) < self$migration_rate) {
             # Sample from the meta community matrix
             self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
@@ -157,6 +158,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     },
 
     #' @description
+    #' distrub the community at given time and replace the dead cells with the neighbors
     disturb = function(time, save) {
       # dead_c <- 0
       # Prepare the buffer
@@ -207,9 +209,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     meta_cm = NULL,
     #' @field new_sp Iteration number on speciation to create a new species each time
     new_sp = 1,
-    #' @field species_count The number of species at each time
-    #' why did i add that again
-    species_count = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -218,7 +217,12 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         timeline = 0,
         type = "Species",
         neighborhood = "Moore 1",
-        global_pattern = NULL) {
+        global_pattern = NULL,
+        model = "default",
+        death_rate = 0.1,
+        migration_rate = 0.005,
+        speciation_rate = 0.001
+        ) {
       super$initialize(
         pattern = local_pattern,
         timeline = timeline,
@@ -226,32 +230,40 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         neighborhood = neighborhood
       )
       # TODO : add whatever I want here when I create a neutral theory model
-      #            meaning : the model that will plot, the local community, the meta community
+      #        - the local community
+      #        - the meta community
+      #        - the species count
+      #        - the speciation rate
+      #        - the migration rate
+      #        - the death rate
+      #        - the birth rate
+      #        - the disturbance rate
 
+      #TODO BY DEFAULT, no pattern is given, we create communities
       # We're creating the local community model
-      self$local_cm <- local_pc$new(death_rate = self$death_rate, draw = TRUE)
+      if (isFALSE(model == "local") && isFALSE(model == "meta")) {
+        self$local_cm <- local_pc$new(death_rate = self$death_rate)
+        self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
+                                     speciation_rate = self$speciation_rate)
+      } else if (isTRUE(model == "local")) {
+        self$local_cm <- local_pc$new(death_rate = self$death_rate)
+      } else if (isTRUE(model == "meta")) {
+        self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
+                                    speciation_rate = self$speciation_rate)
+      }
+
+
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
 
       # We're creating the meta community model
-      self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
-                                  speciation_rate = self$speciation_rate)
-    },
+      #TODO if patterns are given, we use them
 
-    ## TODO : once all is clean and working, try it
-    ## Not the priority, first finish classes, then meta community
-    ## Only then, we can explore how to display results
-    #' @description
-    #' Draw the abundance of each species over time
-    #  count the number of occurence of each species over time and plot it
-    #     plot_abundance = function() {
-    #       self$count_species()
-    #       plot(self$species_count, type = "l", xlab = "Species", ylab = "Abundance")
-    # }
+    },
 
     #' @description
     #' DRAFT
-    #' TODO
+    #TODO
     count_species = function() {
       self$species_count <- table(unlist(self$run_patterns))
     }

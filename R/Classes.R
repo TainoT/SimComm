@@ -2,7 +2,7 @@
 #'
 #' @description
 #' The model represents a community, i.e. a set of interacting objects called agents.
-#' Their location is described by a `pattern` that `evolve`s along a `timeline`.
+#' Their location is described by a `pattern` that `evolve`s and can be `disturb`ed along a `timeline`.
 #'
 #' @param animate if `TRUE`, the evolution of the model is shown in an animation.
 #' @param FUN A function to apply to each pattern of the evolution of the model.
@@ -519,7 +519,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         self$neighborhood <- "von Neumann 1"
         warning("The neighborhood definition was not recognized: set to the default value.")
       }
-      # Colors for plot()
+      #TODO Colors for plot()
       # self$cols <- grDevices::rainbow(max(pattern))
     },
 
@@ -553,6 +553,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         )
       }
       if(self$neighborhood == "Global" | self$neighborhood == "0") {
+        # Add the buffer zone with the entire pattern
         private$buffered_pattern <- self$pattern
       }
     },
@@ -643,14 +644,11 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
-
       data_list <- list()
       for(i in 1:(length(self$timeline)-1)) {
         species_data <- as.data.frame(table(self$saved_pattern(i)))
         species_data$time <- i
-
-        #TODO---
-        # uni_species <- unique(self$saved_pattern(i))
+        #TODO
         for (c in species_data[species_data$time == i, "Var1"]) {
           for (x in 1:nrow(self$saved_pattern(i))) {
              for (y in 1:ncol(self$saved_pattern(i))) {
@@ -660,8 +658,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
              }
           }
         }
-        #---
-
         data_list[[i]] <- species_data
       }
       temp <- do.call(rbind, data_list)
@@ -671,14 +667,13 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
       temp$time <- as.numeric(temp$time)
       temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
 
-
       self$data_gen <- temp
       if (isTRUE(keep)) {
         print("writing data_gen.csv")
         write.csv(self$data_gen, "data_gen.csv")
       }
-
-      # TODO : make it more user friendly maybe
+      #TODO : make it more user friendly maybe
+      # graph should be a bool or the community we wanna see
       if (is.null(graph) || isTRUE(graph == "all")) {
         overall_abundance_rank(data = self$data_gen)
         timed_abundance(time = time, data = self$data_gen)

@@ -28,8 +28,8 @@ NULL
 timed_abundance <- function(
     time = NULL,
     data = NULL) {
-  # if (is.null(data))
-  #   stop("Data frame is missing")
+  if (is.null(data))
+    stop("Data frame is missing")
   if (is.null(time) || isTRUE(time < 1) || isTRUE(time > nrow(df))) {
     warning("Time is unfit, using the first step")
     time <- 1
@@ -52,8 +52,8 @@ timed_abundance <- function(
 timed_relative_abundance <- function(
     time = NULL,
     data = NULL) {
-  # if (is.null(data))
-  #   stop("Data frame is missing")
+  if (is.null(data))
+    stop("Data frame is missing")
   if (is.null(time) || isTRUE(time < 1) || isTRUE(time > nrow(df))) {
     warning("Time is unfit, using the first step")
     time <- 1
@@ -64,7 +64,8 @@ timed_relative_abundance <- function(
   df$rela_abu <- df$count / total_abu
   df <- df[order(-df$rela_abu), ]
 
-  ggplot(df, aes(x = reorder(factor(species), -rela_abu), y = rela_abu, fill = factor(species))) +
+  ggplot(df, aes(x = reorder(factor(species), -rela_abu),
+                 y = rela_abu, fill = factor(species))) +
     geom_bar(stat = "identity") +
     labs(title = paste("Relative Abundance of Species at Time", time),
          x = "Species", y = "Relative Abundance") +
@@ -78,8 +79,8 @@ timed_relative_abundance <- function(
 #' @export
 overall_abundance_distribution <- function(
     data = NULL) {
-  # if (is.null(data))
-  #   stop("Data frame is missing")
+  if (is.null(data))
+    stop("Data frame is missing")
 
   # abu_distr <- NULL
   abu_distr <- aggregate(count ~ species, data, sum)
@@ -103,18 +104,20 @@ overall_abundance_distribution <- function(
 #' @export
 overall_abundance_rank <- function(
     data = NULL) {
-  # if (is.null(data))
-  #   stop("Data frame is missing")
+  if (is.null(data))
+    stop("Data frame is missing")
 
-  abu_rank <- aggregate(count ~ rank, data, function(x) c(mean = mean(x), sd = sd(x)))
+  abu_rank <- aggregate(count ~ rank, data,
+                        function(x) c(mean = mean(x), sd = sd(x)))
   abu_rank <- do.call(data.frame, abu_rank)
   colnames(abu_rank) <- c("rank", "mean", "sd")
   abu_rank$rank <- reorder(abu_rank$rank, -abu_rank$mean)
 
   ggplot(abu_rank, aes(x = rank, y = mean, fill = as.factor(rank))) +
     geom_bar(stat = "identity", position = "dodge") +
-    geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2, position = position_dodge(0.9)) +
-    labs(title = "Mean and SD of Abundance per Rank of Species Abundance Over Time",
+    geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd),
+                  width = 0.2, position = position_dodge(0.9)) +
+    labs(title = "Mean/SD of Abundance per Rank of Species Abundance Over Time",
          x = "Rank of Species Abundance", y = "Count",
          fill = "Rank") +
     theme_minimal() +
@@ -130,17 +133,16 @@ overall_abundance_rank <- function(
 #' @export
 relative_abundance_rank <- function(
     data = NULL) {
-  # if (is.null(data))
-  #   stop("Data frame is missing")
+  if (is.null(data))
+    stop("Data frame is missing")
 
   sp_count <- aggregate(count ~ species, data, sum)
   sp_count <- sp_count[order(-sp_count$count), ]
   sp_count$rank <- 1:nrow(sp_count)
 
-  tot_count <- sum(sp_count$count)
-  sp_count$rela_abu <- sp_count$count / tot_count
+  sp_count$rela_abu <- sp_count$count / sum(sp_count$count)
 
-  ggplot(species_abundance, aes(x = rank, y = relative_abundance)) +
+  ggplot(sp_count, aes(x = rank, y = rela_abu)) +
     geom_line() +
     labs(title = "Relative Abundance of Species by Rank",
          x = "Species Rank",
@@ -148,5 +150,4 @@ relative_abundance_rank <- function(
     theme_minimal() +
     scale_y_log10()
 }
-
 

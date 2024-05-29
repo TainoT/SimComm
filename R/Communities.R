@@ -1,4 +1,4 @@
-#' Meta Community Class
+#' Community Attributes Class
 #'
 #' @description
 #' The class generate a community of a large number of species.
@@ -15,7 +15,6 @@
 #' @param sd The simulated distribution standard deviation. For the log-normal distribution, this is the standard deviation on the log scale.
 #' @param prob The proportion of ressources taken by successive species in the geometric model.
 #' @param alpha Fisher's alpha in the log-series model.
-#' @param draw the model is being drawn in set_values
 #'
 #' @param abundance The amount of individual in the community (community size)
 #' @param death_rate The mortality rate of individuals
@@ -38,7 +37,6 @@ community_param <- R6::R6Class("community_param",
     sd = NULL,
     prob = NULL,
     alpha = NULL,
-    draw = NULL,
 
     the_matrix = NULL,
     the_wmppp = NULL,
@@ -52,7 +50,8 @@ community_param <- R6::R6Class("community_param",
 
     #' @description
     #' Set values of the community generation parameters (set to default if no arguments)
-    #' TODO 19/04 : make it cleaner, it should only change values, nothing else
+    #TODO set_values should be defaulting t
+    #'
     set_values = function(
     nx = 20,
     ny = nx,
@@ -70,6 +69,8 @@ community_param <- R6::R6Class("community_param",
       self$alpha = alpha
     },
 
+    #' @description
+    #' Show the values of the community generation parameters
     show_values = function() {
     values <- paste(class(self)[1],
                 "\nnx : ", self$nx,
@@ -118,9 +119,6 @@ community_param <- R6::R6Class("community_param",
     #' @description
     #' Draw a wmppp community with no adjective
     draw_wmppp = function(){
-      print(self$nx)
-      print(self$ny)
-      print(self$S)
       spNames <- seq(self$S)
       the_community <- SpatDiv::rSpCommunity(
         1,
@@ -145,7 +143,13 @@ community_param <- R6::R6Class("community_param",
   )
 )
 
-#' Local
+#' Local community
+#'
+#' @description The class generate a local community of a large number of species.
+#'
+#' @docType class
+#' @param death_rate The mortality rate of an individual.
+#' @param fashion The fashion of the community (matrix or wmppp)
 #'
 #' @export
 local_pc <- R6::R6Class("local_pc",
@@ -157,34 +161,19 @@ local_pc <- R6::R6Class("local_pc",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.11,
-    #' @field birth_rate The reproduction rate of an individual.
-    #' Default is `0.2`
-    birth_rate = 0.22,
-    #' @field speciation_rate The speciation rate of an individual
-    #' Default is `0.00001`
-    #' TODO : send that to meta_pc
-    #'        however add an immigration rate
-    #'        immigration rate should be involved only if we have a meta community
-    #-- speciation_rate = 0.00001,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
-    #' TODO : add more ecological rates
-    #'            do a documentation on it, its a bit confusing right now
-    #'        draw does not have a catch
     initialize = function(fashion = "matrix",
-        death_rate = self$death_rate,
-        #-- speciation_rate = self$speciation_rate,
-        draw = FALSE){
+        death_rate = self$death_rate){
       self$death_rate <- death_rate
-      #-- self$speciation_rate <- speciation_rate
-      if (draw & fashion == "matrix"){
+      if (fashion == "matrix"){
         print("into matrix")
-        self$the_matrix <- self$make_local(draw = draw, fashion = fashion)
+        self$the_matrix <- self$make_local(fashion = fashion)
       }
-      else if (draw & fashion == "wmppp") {
+      else if (fashion == "wmppp") {
         print("into wmppp")
-        self$the_wmppp <- self$make_local(draw = draw, fashion = fashion)
+        self$the_wmppp <- self$make_local(fashion = fashion)
       }
       else
         stop("No defined fashion")
@@ -193,9 +182,9 @@ local_pc <- R6::R6Class("local_pc",
 
     #' @description
     #' Local community default community drawing - add death/birth_rate in the matrix
-    #' TODO : Verify if defaulting values in argument is right
-    #'              I could do an option and make a set_value ?
-    #'              strengthen the code, verify if the rates are on same level IN the matrix
+    #TODO : Verify if defaulting values in argument is right
+    #              I could do an option and make a set_value ?
+    #             strengthen the code, verify if the rates are on same level IN the matrix
     make_local = function(
     nx = 10,
     ny = nx,
@@ -206,26 +195,19 @@ local_pc <- R6::R6Class("local_pc",
     theta = 40,
     death_rate = 0.1,
     birth_rate = 0.2,
-    draw = FALSE,
     fashion = "matrix") {
       # We're NOT drawing the matrix
-      # TODO : that's confusing here, i actually forgot why i have the draw condition
-      #        oh, when draw = false, im taking default values, else, im taking from model
-      if (draw == FALSE)
-      self$set_values(nx = self$nx, ny = self$ny, S = self$S,
-                      Distribution = self$Distribution, sd = self$sd,
-                      prob = self$prob, alpha = self$theta)
-      else
-        self$set_values(nx = nx, ny = ny, S = S,
-                        Distribution = Distribution, sd = sd,
-                        prob = prob, alpha = theta)
+      self$set_values(nx = nx, ny = ny, S = S,
+                      Distribution = Distribution, sd = sd,
+                      prob = prob, alpha = theta)
 
-      # We're drawing the matrix with the previous values, matrix is NULL before that
       if (isTRUE(fashion == "matrix")){
+        self$the_matrix <- NULL
         self$the_matrix <- self$draw_matrix()
         return(self$the_matrix)
       }
       else if (isTRUE(fashion == "wmppp")){
+        self$the_wmppp <- NULL
         self$the_wmppp <- self$draw_wmppp()
         return(self$the_wmppp)
       }
@@ -240,6 +222,12 @@ local_pc <- R6::R6Class("local_pc",
 
 #' Meta community
 #'
+#' @description The class generate a meta community of a large number of species.
+#'
+#' @docType class
+#' @param migration_rate The migration rate of an individual.
+#' @param speciation_rate The speciation rate of an individual.
+#'
 #' @export
 meta_pc <- R6::R6Class("meta_pc",
   inherit = community_param,
@@ -248,11 +236,11 @@ meta_pc <- R6::R6Class("meta_pc",
   ),
   public = list(
     #' @field migration_rate The migration of an individual.
-    #' Default is `0.055`
-    migration_rate = 0.055,
+    #' Default is `0.005`
+    migration_rate = 0.0055,
     #' @field speciation_rate The speciation rate of an individual
     #' Default is `0.00001`
-    speciation_rate = 0.0011,
+    speciation_rate = 0.000011,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -269,35 +257,27 @@ meta_pc <- R6::R6Class("meta_pc",
     #' @description
     #' Meta community default community drawing - add migr/spec_rate in the matrix
     make_meta = function(
-    nx = 4000,
+    nx = 100,
     ny = nx,
-    S = 100, ## TODO : use Fisher's to get a proper N number here
+    S = 100, #TODO : use Fisher's to get a proper N number here
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
     theta = 40,
     migration_rate = 0.05,
     speciation_rate = 0.001) {
-      # Register new values for attributes before making matrix
-      # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
-      #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
-      if (nx > 4000) {
+      if (nx > 4000 || ny > 4000) {
         nx = 4000
         ny = nx
         warning("Too large number, defaulted back to the max allowed")
       }
-      # is that matrix nullification necessary ?
-      self$the_matrix <- NULL
       self$set_values(nx = nx, ny = ny, S = S,
                       Distribution = Distribution, sd = sd,
                       prob = prob, alpha = theta)
-      # TODO KEep these lines til I figure out why I wrote them in local_pc
-      # self$set_values(nx = self$nx, ny = self$ny, S = self$S,
-      #                 Distribution = self$Distribution, sd = self$sd, prob = self$prob, alpha = self$theta)
-      # Make the matrix
+      self$the_matrix <- NULL
       self$the_matrix <- self$draw_matrix()
 
-      # remove the first str from the inherit but is that necessary to have that ?
+      #TODO remove the first str from the inherit but is that necessary to have that ?
 #-----class(self$the_matrix) <- c("make_meta", class(self$the_matrix), migration_rate)
 
       print("make_meta called")

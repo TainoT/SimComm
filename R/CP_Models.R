@@ -142,8 +142,7 @@ cp_hubbell <- R6::R6Class("cp_hubbell",
 
       # We're creating a local point community
 
-      self$local_cp <- local_pc$new(death_rate = self$death_rate,
-                                    draw = TRUE, fashion = "wmppp")
+      self$local_cp <- local_pc$new(death_rate = self$death_rate, fashion = "wmppp")
 
       # self$pattern <- self$local_cp$the_wmppp
 
