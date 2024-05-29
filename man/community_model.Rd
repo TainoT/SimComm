@@ -5,7 +5,7 @@
 \title{Community Model Class}
 \description{
 The model represents a community, i.e. a set of interacting objects called agents.
-Their location is described by a \code{pattern} that \code{evolve}s along a \code{timeline}.
+Their location is described by a \code{pattern} that \code{evolve}s and can be \code{disturb}ed along a \code{timeline}.
 }
 \examples{
 myModel <- community_matrixmodel$new()

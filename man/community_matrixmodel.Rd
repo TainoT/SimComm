@@ -21,7 +21,8 @@ A \link{community_model} whose pattern is a regular, rectangular grid of points.
 \item{\code{neighborhood}}{A character string defining what is the neighborhood of a cell:
 "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
 "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
-"Moore 2" or "24" for two rings of neighbors.}
+"Moore 2" or "24" for two rings of neighbors.
+"Global" or "0" for all cells.}
 }
 \if{html}{\out{</div>}}
 }
@@ -31,8 +32,10 @@ A \link{community_model} whose pattern is a regular, rectangular grid of points.
 \item \href{#method-community_matrixmodel-new}{\code{community_matrixmodel$new()}}
 \item \href{#method-community_matrixmodel-prepare_buffer}{\code{community_matrixmodel$prepare_buffer()}}
 \item \href{#method-community_matrixmodel-neighbors}{\code{community_matrixmodel$neighbors()}}
+\item \href{#method-community_matrixmodel-same_neighbors}{\code{community_matrixmodel$same_neighbors()}}
 \item \href{#method-community_matrixmodel-plot}{\code{community_matrixmodel$plot()}}
 \item \href{#method-community_matrixmodel-autoplot}{\code{community_matrixmodel$autoplot()}}
+\item \href{#method-community_matrixmodel-graph}{\code{community_matrixmodel$graph()}}
 \item \href{#method-community_matrixmodel-clone}{\code{community_matrixmodel$clone()}}
 }
 }
@@ -73,7 +76,8 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \item{\code{neighborhood}}{A character string defining what is the neighborhood of a cell:
 "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
 "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
-"Moore 2" or "24" for two rings of neighbors.}
+"Moore 2" or "24" for two rings of neighbors.
+"Global" or "0" for all cells.}
 }
 \if{html}{\out{</div>}}
 }
@@ -95,6 +99,24 @@ Prepare buffered_pattern at each step of evolution
 Return the vector of neighbors of a cell, defined by it row and column
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$neighbors(row, col)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{row}}{The row of the focal cell.}
+
+\item{\code{col}}{The column of the focal cell.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-community_matrixmodel-same_neighbors"></a>}}
+\if{latex}{\out{\hypertarget{method-community_matrixmodel-same_neighbors}{}}}
+\subsection{Method \code{same_neighbors()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$same_neighbors(row, col, species)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -136,6 +158,26 @@ Its value should be in \code{timeline}.}
 Produces a ggplot of the pattern.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$autoplot(time = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{time}}{The point of the timeline considered.
+Its value should be in \code{timeline}.}
+
+\item{\code{...}}{Extra arguments to be passed to methods.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-community_matrixmodel-graph"></a>}}
+\if{latex}{\out{\hypertarget{method-community_matrixmodel-graph}{}}}
+\subsection{Method \code{graph()}}{
+Produces the graphs
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$graph(time = 1, graph = NULL, keep = NULL, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

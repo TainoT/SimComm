@@ -45,6 +45,9 @@ Default is \code{0.0001}}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{birth_rate}}{The reproduction rate of an individual.
+Default is \code{0.2}}
+
 \item{\code{community}}{The matrix local community}
 
 \item{\code{metacom}}{The meta community}
@@ -55,7 +58,7 @@ Default is \code{0.0001}}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-cm_hubbell-new}{\code{cm_hubbell$new()}}
-\item \href{#method-cm_hubbell-plot_line}{\code{cm_hubbell$plot_line()}}
+\item \href{#method-cm_hubbell-count_species}{\code{cm_hubbell$count_species()}}
 \item \href{#method-cm_hubbell-clone}{\code{cm_hubbell$clone()}}
 }
 }
@@ -66,9 +69,11 @@ Default is \code{0.0001}}
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_model" data-id="run"><a href='../../SimComm/html/community_model.html#method-community_model-run'><code>SimComm::community_model$run()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_model" data-id="saved_pattern"><a href='../../SimComm/html/community_model.html#method-community_model-saved_pattern'><code>SimComm::community_model$saved_pattern()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="autoplot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-autoplot'><code>SimComm::community_matrixmodel$autoplot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="graph"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-graph'><code>SimComm::community_matrixmodel$graph()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-neighbors'><code>SimComm::community_matrixmodel$neighbors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="plot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-plot'><code>SimComm::community_matrixmodel$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="prepare_buffer"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-prepare_buffer'><code>SimComm::community_matrixmodel$prepare_buffer()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="same_neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-same_neighbors'><code>SimComm::community_matrixmodel$same_neighbors()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -76,35 +81,48 @@ Default is \code{0.0001}}
 \if{html}{\out{<a id="method-cm_hubbell-new"></a>}}
 \if{latex}{\out{\hypertarget{method-cm_hubbell-new}{}}}
 \subsection{Method \code{new()}}{
+distrub the community at given time and replace the dead cells with the neighbors
+
+
 Create a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$new(
-  pattern = NULL,
+  local_pattern = NULL,
   timeline = 0,
   type = "Species",
-  neighborhood = "Moore 1"
+  neighborhood = "Moore 1",
+  global_pattern = NULL,
+  model = "default",
+  death_rate = 0.1,
+  migration_rate = 0.005,
+  speciation_rate = 0.001
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{pattern}}{The pattern which describe the location of agents.}
-
 \item{\code{timeline}}{A numeric vector that contains the points of time of interest.}
 
 \item{\code{type}}{The type of individuals. Information only.}
+
+\item{\code{neighborhood}}{A character string defining what is the neighborhood of a cell:
+"von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
+"Moore 1 or 8" for all adjacent cells (the first four and North-West, etc.);
+"Moore 2 or 24" for two rings of neighbors.
+"Global or 0" for the whole matrix as neighborhood.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cm_hubbell-plot_line"></a>}}
-\if{latex}{\out{\hypertarget{method-cm_hubbell-plot_line}{}}}
-\subsection{Method \code{plot_line()}}{
-Draw the abundance of each species over time
+\if{html}{\out{<a id="method-cm_hubbell-count_species"></a>}}
+\if{latex}{\out{\hypertarget{method-cm_hubbell-count_species}{}}}
+\subsection{Method \code{count_species()}}{
+DRAFT
+TODO
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$plot_line()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$count_species()}\if{html}{\out{</div>}}
 }
 
 }

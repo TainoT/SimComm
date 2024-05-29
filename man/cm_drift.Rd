@@ -28,10 +28,12 @@ Edge effects are eliminated by a toroidal correction.
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_model" data-id="run"><a href='../../SimComm/html/community_model.html#method-community_model-run'><code>SimComm::community_model$run()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_model" data-id="saved_pattern"><a href='../../SimComm/html/community_model.html#method-community_model-saved_pattern'><code>SimComm::community_model$saved_pattern()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="autoplot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-autoplot'><code>SimComm::community_matrixmodel$autoplot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="graph"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-graph'><code>SimComm::community_matrixmodel$graph()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="initialize"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-initialize'><code>SimComm::community_matrixmodel$initialize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-neighbors'><code>SimComm::community_matrixmodel$neighbors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="plot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-plot'><code>SimComm::community_matrixmodel$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="prepare_buffer"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-prepare_buffer'><code>SimComm::community_matrixmodel$prepare_buffer()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="same_neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-same_neighbors'><code>SimComm::community_matrixmodel$same_neighbors()</code></a></span></li>
 </ul>
 </details>
 }}

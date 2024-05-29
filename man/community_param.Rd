@@ -3,7 +3,7 @@
 \docType{class}
 \name{community_param}
 \alias{community_param}
-\title{Meta Community Class}
+\title{Community Attributes Class}
 \description{
 The class generate a community of a large number of species.
 \subsection{this part isn't complete yet}{
@@ -14,6 +14,7 @@ The class generate a community of a large number of species.
 \itemize{
 \item \href{#method-community_param-new}{\code{community_param$new()}}
 \item \href{#method-community_param-set_values}{\code{community_param$set_values()}}
+\item \href{#method-community_param-show_values}{\code{community_param$show_values()}}
 \item \href{#method-community_param-draw_matrix}{\code{community_param$draw_matrix()}}
 \item \href{#method-community_param-draw_wmppp}{\code{community_param$draw_wmppp()}}
 \item \href{#method-community_param-clone}{\code{community_param$clone()}}
@@ -34,7 +35,6 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \if{latex}{\out{\hypertarget{method-community_param-set_values}{}}}
 \subsection{Method \code{set_values()}}{
 Set values of the community generation parameters (set to default if no arguments)
-TODO 19/04 : make it cleaner, it should only change values, nothing else
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{community_param$set_values(
   nx = 20,
@@ -68,6 +68,16 @@ For the community drawing with entropart}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-community_param-show_values"></a>}}
+\if{latex}{\out{\hypertarget{method-community_param-show_values}{}}}
+\subsection{Method \code{show_values()}}{
+Show the values of the community generation parameters
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{community_param$show_values()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-community_param-draw_matrix"></a>}}
