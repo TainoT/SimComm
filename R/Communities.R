@@ -72,14 +72,15 @@ community_param <- R6::R6Class("community_param",
     #' @description
     #' Show the values of the community generation parameters
     show_values = function() {
-    values <- paste(class(self)[1],
-                "\nnx : ", self$nx,
-                " | ny : ", self$ny,
-                "\nS : ", self$S,
-                "\nDistribution : ", self$Distribution,
-                " | sd : ", self$sd,
-                " | prob : ", self$prob,
-                "\nalpha : ", self$alpha)
+    values <- paste("Type :", class(self)[1],
+                "\n> Landscape ::\nnx = ", self$nx,
+                "| ny = ", self$ny,
+                "\n> Community ::\nS = ", self$S,
+                "| size = ", self$nx * self$ny,
+                "| alpha = ", self$alpha,
+                "\n> Simulation ::\nDistribution : ", self$Distribution,
+                "| sd : ", self$sd,
+                "| prob : ", self$prob)
     cat(values)
     },
 
@@ -112,7 +113,6 @@ community_param <- R6::R6Class("community_param",
       # are we sure we need to add that name ? this is confusing rn
       # i can send the_matrix right away and let the next function deal with it
 #-----class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
-      print("draw_matrix called")
       return(self$the_matrix)
     },
 
@@ -134,7 +134,6 @@ community_param <- R6::R6Class("community_param",
       # TODO I need to SAMPLE the community from 100 * x * y to a size of 100
       self$the_wmppp <- the_community
       # self$the_wmpp <- matrix()
-      print("draw_wmppp called")
       return(self$the_wmppp)
       # self$the_wmppp <- the_community
     }
@@ -168,16 +167,14 @@ local_pc <- R6::R6Class("local_pc",
         death_rate = self$death_rate){
       self$death_rate <- death_rate
       if (fashion == "matrix"){
-        print("into matrix")
         self$the_matrix <- self$make_local(fashion = fashion)
       }
       else if (fashion == "wmppp") {
-        print("into wmppp")
         self$the_wmppp <- self$make_local(fashion = fashion)
       }
       else
         stop("No defined fashion")
-      print("local community is created")
+      print("instanciation has been called : local_pc")
     },
 
     #' @description
@@ -193,8 +190,7 @@ local_pc <- R6::R6Class("local_pc",
     sd = 1,
     prob = 0.1,
     theta = 40,
-    death_rate = 0.1,
-    birth_rate = 0.2,
+    death_rate = self$death_rate,
     fashion = "matrix") {
       # We're NOT drawing the matrix
       self$set_values(nx = nx, ny = ny, S = S,
@@ -251,7 +247,7 @@ meta_pc <- R6::R6Class("meta_pc",
       self$migration_rate <- migration_rate
       self$speciation_rate <- speciation_rate
       self$the_matrix <- self$make_meta()
-      print("meta community is created")
+      print("instanciation has been called : meta_pc")
     },
 
     #' @description
@@ -264,8 +260,8 @@ meta_pc <- R6::R6Class("meta_pc",
     sd = 1,
     prob = 0.1,
     theta = 40,
-    migration_rate = 0.05,
-    speciation_rate = 0.001) {
+    migration_rate = self$migration_rate,
+    speciation_rate = self$speciation_rate) {
       if (nx > 4000 || ny > 4000) {
         nx = 4000
         ny = nx
@@ -280,7 +276,6 @@ meta_pc <- R6::R6Class("meta_pc",
       #TODO remove the first str from the inherit but is that necessary to have that ?
 #-----class(self$the_matrix) <- c("make_meta", class(self$the_matrix), migration_rate)
 
-      print("make_meta called")
       return(self$the_matrix)
     }
     )
