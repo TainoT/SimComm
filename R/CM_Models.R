@@ -133,21 +133,34 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # Prepare the buffer
       self$prepare_buffer()
 
+      # Prep the model
+      if (isTRUE(self$model == "local"))
+        self$migration_rate <- 0
       # Change cells
       for(row in seq(nrow(self$pattern))) {
         for(col in seq(ncol(self$pattern))) {
+          r <- runif(1, 0, 1)
           # Roll a dice between 0 and 1, if the roll is lower than rate, then run it
           #TODO verify if meta community is not empty
-          if (runif(1, 0, 1) < self$migration_rate) {
+          if ((self$model == "default")
+              && r < self$migration_rate) {
             # Sample from the meta community matrix
             self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
           }
           # death rate is removed from the spc and migration rate as we already assume death here
-          else if (runif(1, 0, 1) < self$death_rate - self$migration_rate) {
+          else if ((self$model == "default" || self$model == "local")
+                   && r < self$death_rate - self$migration_rate) {
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           }
           else
             self$pattern[row, col] <- self$pattern[row, col]
+
+          if ((self$model == "default" || self$model == "meta")
+              && r < self$speciation_rate) {
+            #TODO
+            # add a new species to the meta community
+            print("Speciation")
+          }
         }
       }
 
@@ -192,23 +205,18 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
-    # TODO: I dont think brate is necessary unless we have an empty state to colonize
-    # but it wouldn't be a zero-sum area theory
-    #' @field birth_rate The reproduction rate of an individual.
-    #' Default is `0.2`
-    # birth_rate = 0.2,
     #' @field migration_rate The reproduction rate of an individual.
-    #' Default is `0.05`
+    #' Default is `0.005`
     migration_rate = 0.005,
     #' @field speciation_rate The reproduction rate of an individual.
     #' Default is `0.0001`
-    speciation_rate = 0.001,
-    #' @field community The matrix local community
+    speciation_rate = 0.0001,
+    #' @field local_cm The matrix local community
     local_cm = NULL,
-    #' @field metacom The meta community
+    #' @field meta_cm The matrix meta community
     meta_cm = NULL,
-    #' @field new_sp Iteration number on speciation to create a new species each time
-    new_sp = 1,
+    #' @field model The model to use
+    model = "default",
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -218,10 +226,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         type = "Species",
         neighborhood = "Moore 1",
         global_pattern = NULL,
-        model = "default",
-        death_rate = 0.1,
-        migration_rate = 0.005,
-        speciation_rate = 0.001
+        model = model,
+        death_rate = self$death_rate,
+        migration_rate = self$migration_rate,
+        speciation_rate = self$speciation_rate
         ) {
       super$initialize(
         pattern = local_pattern,
@@ -229,6 +237,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         type = type,
         neighborhood = neighborhood
       )
+      self$model <- model
+      self$death_rate <- death_rate
+      self$migration_rate <- migration_rate
+      self$speciation_rate <- speciation_rate
       # TODO : add whatever I want here when I create a neutral theory model
       #        - the local community
       #        - the meta community
@@ -241,17 +253,20 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       #TODO BY DEFAULT, no pattern is given, we create communities
       # We're creating the local community model
-      if (isFALSE(model == "local") && isFALSE(model == "meta")) {
+      if (isTRUE(self$model == "local")) {
         self$local_cm <- local_pc$new(death_rate = self$death_rate)
-        self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
-                                     speciation_rate = self$speciation_rate)
-      } else if (isTRUE(model == "local")) {
-        self$local_cm <- local_pc$new(death_rate = self$death_rate)
-      } else if (isTRUE(model == "meta")) {
+      } else if (isTRUE(self$model == "meta")) {
         self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
                                     speciation_rate = self$speciation_rate)
+      } else {
+        if (isTRUE(self$model == "default")) {
+          self$local_cm <- local_pc$new(death_rate = self$death_rate)
+          self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
+                                      speciation_rate = self$speciation_rate)
+        } else {
+          stop("Model not recognized. Please use 'local', 'meta' or 'default'")
+        }
       }
-
 
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
@@ -259,6 +274,26 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # We're creating the meta community model
       #TODO if patterns are given, we use them
 
+    },
+
+    #' @description
+    #' Show the values of the model
+    show_values = function(values = "basic") {
+      if (values == "basic") {
+        print(paste("Model: ", self$model))
+        print(paste("Death rate: ", self$death_rate))
+        print(paste("Migration rate: ", self$migration_rate))
+        print(paste("Speciation rate: ", self$speciation_rate))
+      }
+      else if (values == "all"){
+        if (is.null(self$local_cm) == FALSE)
+          self$local_cm$show_values()
+        print(paste("\n====================\n"))
+        if (is.null(self$meta_cm) == FALSE)
+          self$meta_cm$show_values()
+      }
+      else
+        warning("Values not recognized. Please use 'basic' or 'all'")
     },
 
     #' @description

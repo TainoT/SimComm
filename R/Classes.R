@@ -87,6 +87,8 @@ community_model <- R6::R6Class("community_model",
     last_time = NULL,
     #' @field run_patterns The past patterns of the model, obtained by `run` and saved.
     run_patterns = NULL,
+    #' @field redraw
+    redraw = FALSE,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -137,6 +139,7 @@ community_model <- R6::R6Class("community_model",
         self$last_time = self$timeline[1]
       } else {
         # Order
+        self$redraw <- TRUE
         more_time <- sort(more_time)
         # Eliminate overlap
         if(more_time[1] <= self$last_time) {
@@ -640,47 +643,50 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
 
     #' @description
     #' Produces the graphs
-    graph = function(time = 1, graph = NULL, keep = NULL,...) {
+    #TODO add option to chose which community to plot (community = local/meta)
+    graph = function(time = 1, graph = NULL, keep = NULL, community = NULL, ...) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
-      data_list <- list()
-      for(i in 1:(length(self$timeline)-1)) {
-        species_data <- as.data.frame(table(self$saved_pattern(i)))
-        species_data$time <- i
-        #TODO
-        for (c in species_data[species_data$time == i, "Var1"]) {
-          for (x in 1:nrow(self$saved_pattern(i))) {
-             for (y in 1:ncol(self$saved_pattern(i))) {
-               if (self$saved_pattern(i)[x,y] == c)
-                 species_data$occurence[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) / length(self$neighbors(x, y))
-                 # species_data$occurence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
-             }
-          }
-        }
-        data_list[[i]] <- species_data
-      }
-      temp <- do.call(rbind, data_list)
-      colnames(temp) <- c("species", "count", "time")#, "occurence")
-      temp$species <- as.numeric(as.character(temp$species))
-      temp$count <- as.numeric(as.character(temp$count))
-      temp$time <- as.numeric(temp$time)
-      temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
 
-      self$data_gen <- temp
+      #TODO add more index to the data_gen, diversity, neighbors, etc
+      if (is.null(self$data_gen) || isTRUE(self$redraw)) {
+        data_list <- list()
+        for(i in 1:(length(self$timeline)-1)) {
+          species_data <- as.data.frame(table(self$saved_pattern(i)))
+          species_data$time <- i
+          #TODO
+          for (c in species_data[species_data$time == i, "Var1"]) {
+            for (x in 1:nrow(self$saved_pattern(i))) {
+              for (y in 1:ncol(self$saved_pattern(i))) {
+                if (self$saved_pattern(i)[x,y] == c)
+                  species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) / length(self$neighbors(x, y))
+                # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
+              }
+            }
+          }
+          data_list[[i]] <- species_data
+        }
+        temp <- do.call(rbind, data_list)
+        colnames(temp) <- c("species", "count", "time", "neighbors")
+        temp$species <- as.numeric(as.character(temp$species))
+        temp$count <- as.numeric(as.character(temp$count))
+        temp$time <- as.numeric(temp$time)
+        temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
+        self$redraw <- FALSE
+        self$data_gen <- temp
+      }
       if (isTRUE(keep)) {
         print("writing data_gen.csv")
         write.csv(self$data_gen, "data_gen.csv")
       }
-      #TODO : make it more user friendly maybe
-      # graph should be a bool or the community we wanna see
       if (is.null(graph) || isTRUE(graph == "all")) {
         overall_abundance_rank(data = self$data_gen)
         timed_abundance(time = time, data = self$data_gen)
         timed_relative_abundance(time = time, data = self$data_gen)
         overall_abundance_distribution(data = self$data_gen)
         relative_abundance_rank(data = self$data_gen)
-        }
+      }
       if (is.null(graph) || isTRUE(graph == "overall_abundance_rank")) {
         overall_abundance_rank(data = self$data_gen)
       }
