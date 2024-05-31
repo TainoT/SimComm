@@ -83,6 +83,10 @@ community_model <- R6::R6Class("community_model",
     type = NULL,
     #' @field timeline A numeric vector.
     timeline = NULL,
+    #' @field event The time of disturbance.
+    event = NULL,
+    #' @field kill_rate The rate of disturbance.
+    kill_rate = 0,
     #' @field last_time The last time (in the time line) the model has been run.
     last_time = NULL,
     #' @field run_patterns The past patterns of the model, obtained by `run` and saved.
@@ -172,7 +176,7 @@ community_model <- R6::R6Class("community_model",
         # adapt evolve to NOT include NA in the calculation of neighbours
         # sample(x[!is.na(x)], 1)
         # TODO: add a disturbance method
-        if (any(time == c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)))
+        if (any(time == self$event))
           private$disturb(time, save)
         else
           private$evolve(time, save)
@@ -644,7 +648,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' @description
     #' Produces the graphs
     #TODO add option to chose which community to plot (community = local/meta)
-    graph = function(time = 1, graph = NULL, keep = NULL, community = NULL, ...) {
+    graph = function(time = 1, graph = NULL, keep = NULL, community = NULL, save = NULL) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
@@ -660,7 +664,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
             for (x in 1:nrow(self$saved_pattern(i))) {
               for (y in 1:ncol(self$saved_pattern(i))) {
                 if (self$saved_pattern(i)[x,y] == c)
-                  species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) / length(self$neighbors(x, y))
+                  species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) # / length(self$neighbors(x, y))
                 # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
               }
             }
@@ -676,18 +680,22 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         self$redraw <- FALSE
         self$data_gen <- temp
       }
+
+      if (isTRUE(save)) {
+        return(self$data_gen)
+      }
       if (isTRUE(keep)) {
         print("writing data_gen.csv")
         write.csv(self$data_gen, "data_gen.csv")
       }
-      if (is.null(graph) || isTRUE(graph == "all")) {
+      if (isTRUE(graph == "all")) {
         overall_abundance_rank(data = self$data_gen)
         timed_abundance(time = time, data = self$data_gen)
         timed_relative_abundance(time = time, data = self$data_gen)
         overall_abundance_distribution(data = self$data_gen)
         relative_abundance_rank(data = self$data_gen)
       }
-      if (is.null(graph) || isTRUE(graph == "overall_abundance_rank")) {
+      if (isTRUE(graph == "overall_abundance_rank")) {
         overall_abundance_rank(data = self$data_gen)
       }
       else if (isTRUE(graph == "timed_abundance")) {

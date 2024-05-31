@@ -174,7 +174,6 @@ local_pc <- R6::R6Class("local_pc",
       }
       else
         stop("No defined fashion")
-      print("instanciation has been called : local_pc")
     },
 
     #' @description
@@ -247,7 +246,6 @@ meta_pc <- R6::R6Class("meta_pc",
       self$migration_rate <- migration_rate
       self$speciation_rate <- speciation_rate
       self$the_matrix <- self$make_meta()
-      print("instanciation has been called : meta_pc")
     },
 
     #' @description
