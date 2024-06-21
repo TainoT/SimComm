@@ -263,8 +263,11 @@ community_spcmodel <- R6::R6Class("community_spcmodel",
         type = "Species") {
       super$initialize(pattern=pattern, timeline=timeline)
       self$type <- type
-      self$tess <- spatstat.geom::dirichlet(self$pattern)
-    },
+      if (is.null(self$pattern$the_wmppp))
+        self$tess <- spatstat.geom::dirichlet(self$pattern)
+      else
+        self$tess <- spatstat.geom::dirichlet(self$pattern$the_wmppp)
+      },
 
     #' @description
     #' The n nearest neighbors
@@ -695,7 +698,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         overall_abundance_distribution(data = self$data_gen)
         relative_abundance_rank(data = self$data_gen)
       }
-      if (isTRUE(graph == "overall_abundance_rank")) {
+      else if (isTRUE(graph == "overall_abundance_rank")) {
         overall_abundance_rank(data = self$data_gen)
       }
       else if (isTRUE(graph == "timed_abundance")) {
