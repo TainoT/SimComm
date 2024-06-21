@@ -38,12 +38,13 @@ timed_abundance <- function(
   df <- data[data$time == time, ]
   df <- df[order(-df$count), ]
 
-  ggplot(df, aes(x = factor(species, levels = species), y = count)) +
+  g <- ggplot(df, aes(x = factor(species, levels = species), y = count)) +
     geom_bar(stat = "identity", fill = "skyblue") +
     labs(title = paste("Abundance of species at time", time),
          x = "Species", y = "Count") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  print(g)
 }
 
 #' @rdname timed_relative_abundance
@@ -64,7 +65,7 @@ timed_relative_abundance <- function(
   df$rela_abu <- df$count / total_abu
   df <- df[order(-df$rela_abu), ]
 
-  ggplot(df, aes(x = reorder(factor(species), -rela_abu),
+  g <- ggplot(df, aes(x = reorder(factor(species), -rela_abu),
                  y = rela_abu, fill = factor(species))) +
     geom_bar(stat = "identity") +
     labs(title = paste("Relative Abundance of Species at Time", time),
@@ -72,6 +73,7 @@ timed_relative_abundance <- function(
     theme_minimal() +
     theme(axis.title.x = element_blank(), legend.position = "none") +
     scale_y_continuous(labels = scales::percent_format())
+  print(g)
   }
 
 #' @rdname overall_abundance_distribution
@@ -85,7 +87,8 @@ overall_abundance_distribution <- function(
   # abu_distr <- NULL
   abu_distr <- aggregate(count ~ species, data, sum)
   abu_distr <- abu_distr[order(-abu_distr$count), ]
-  ggplot(data, aes(x = factor(time), y = count, fill = factor(species))) +
+
+  g <- ggplot(data, aes(x = factor(time), y = count, fill = factor(species))) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = rainbow(length(abu_distr$species))) +
     labs(title = "Distribution of Abundance of Species Over Time",
@@ -96,6 +99,7 @@ overall_abundance_distribution <- function(
     theme(axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
           legend.position = "none")
+  print(g)
 }
 
 
@@ -113,7 +117,7 @@ overall_abundance_rank <- function(
   colnames(abu_rank) <- c("rank", "mean", "sd")
   abu_rank$rank <- reorder(abu_rank$rank, -abu_rank$mean)
 
-  ggplot(abu_rank, aes(x = rank, y = mean, fill = as.factor(rank))) +
+  g <- ggplot(abu_rank, aes(x = rank, y = mean, fill = as.factor(rank))) +
     geom_bar(stat = "identity", position = "dodge") +
     geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd),
                   width = 0.2, position = position_dodge(0.9)) +
@@ -126,6 +130,7 @@ overall_abundance_rank <- function(
       axis.ticks.x=element_blank(),
       legend.position = "none"
     )
+  print(g)
 }
 
 #' @rdname relative_abundance_rank
@@ -142,12 +147,13 @@ relative_abundance_rank <- function(
 
   sp_count$rela_abu <- sp_count$count / sum(sp_count$count)
 
-  ggplot(sp_count, aes(x = rank, y = rela_abu)) +
+  g <- ggplot(sp_count, aes(x = rank, y = rela_abu)) +
     geom_line() +
     labs(title = "Relative Abundance of Species by Rank",
          x = "Species Rank",
          y = "Relative Abundance") +
     theme_minimal() +
     scale_y_log10()
+  print(g)
 }
 
