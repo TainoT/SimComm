@@ -133,6 +133,18 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # Prepare the buffer
       self$prepare_buffer()
 
+      get_or_assign_local_id <- function(meta_species) {
+        if (!is.null(self$species_mapping[[as.character(meta_species)]])) {
+          return(self$species_mapping[[as.character(meta_species)]])
+        } else {
+          local_id <- self$next_local_id
+          self$species_mapping[[as.character(meta_species)]] <- local_id
+          self$next_local_id <- self$next_local_id + 1
+          # self$species_mapping[as.character(meta_species]] <- self$next_local_id
+          return(local_id)
+        }
+      }
+
       # Prep the model
       if (isTRUE(self$model == "local"))
         self$migration_rate <- 0
@@ -143,7 +155,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
           # Migration happens if both communities are made
           if ((self$model == "default")
               && r < self$migration_rate) {
-            self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
+            meta_species <- sample(self$meta_cm$the_matrix, size = 1)
+            local_species <- get_or_assign_local_id(meta_species)
+            self$pattern[row, col] <- local_species
+            # self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
           }
           # Death happens only in the local community, subtracted from the migration rate
           else if ((self$model == "default" || self$model == "local")
@@ -158,6 +173,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
               && r < self$speciation_rate) {
             #TODO
             # add a new species to the meta community
+            new_species <- self$next_local_id
+            self$pattern[row, col] <- new_species
+            self$species_mapping[[as.character(new_species)]] <- new_species
+            self$next_local_id <- self$next_local_id + 1
             print("Speciation")
           }
         }
@@ -205,13 +224,13 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
-    #' #' @field kill_rate The disturbance rate of an individual.
+    #' #' @field kill_rate The disturbance rate of a community.
     #' #' Default is `1`
     kill_rate = 0,
-    #' @field migration_rate The reproduction rate of an individual.
+    #' @field migration_rate The migration rate of an individual.
     #' Default is `0.005`
     migration_rate = 0.005,
-    #' @field speciation_rate The reproduction rate of an individual.
+    #' @field speciation_rate The speciation rate of an individual.
     #' Default is `0.0001`
     speciation_rate = 0.0001,
     #' @field local_cm The matrix local community
@@ -220,6 +239,10 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     meta_cm = NULL,
     #' @field model The model to use
     model = "default",
+    #' @field species_mapping A mapping of meta species to local species
+    species_mapping = NULL,
+    #'@field next_local_id The next avilaible local id
+    next_local_id = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -229,13 +252,12 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         type = "Species",
         neighborhood = "Moore 1",
         global_pattern = NULL,
-        model = model,
+        model = self$model,
         death_rate = self$death_rate,
         disturbance_rate = self$kill_rate,
         event = NULL,
         migration_rate = self$migration_rate,
-        speciation_rate = self$speciation_rate
-        ) {
+        speciation_rate = self$speciation_rate) {
       super$initialize(
         pattern = local_pattern,
         timeline = timeline,
@@ -248,19 +270,24 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       self$event <- event
       self$migration_rate <- migration_rate
       self$speciation_rate <- speciation_rate
+      self$species_mapping <- list()
+      # self$next_local_id <- max(self$pattern) + 1
+
       # TODO : add whatever I want here when I create a neutral theory model
       #        - the species count
 
       #TODO BY DEFAULT, no pattern is given, we create communities
       # We're creating the local community model
       if (isTRUE(self$model == "local")) {
-        self$local_cm <- local_pc$new(death_rate = self$death_rate)
+        self$local_cm <- local_pc$new(death_rate = self$death_rate,
+                                      fashion = "matrix")
       } else if (isTRUE(self$model == "meta")) {
         self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
                                     speciation_rate = self$speciation_rate)
       } else {
         if (isTRUE(self$model == "default")) {
-          self$local_cm <- local_pc$new(death_rate = self$death_rate)
+          self$local_cm <- local_pc$new(death_rate = self$death_rate,
+                                        fashion = "matrix")
           self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
                                       speciation_rate = self$speciation_rate)
         } else {
@@ -270,16 +297,17 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
+      self$next_local_id <- max(self$pattern) + 1
     },
 
     #' @description
     #' Show the values of the model
     show_values = function(values = "basic") {
       if (values == "basic") {
-        print(paste("Model: ", self$model))
-        print(paste("Death rate: ", self$death_rate))
-        print(paste("Migration rate: ", self$migration_rate))
-        print(paste("Speciation rate: ", self$speciation_rate))
+        print(paste("Model:", self$model))
+        print(paste("Death rate:", self$death_rate))
+        print(paste("Migration rate:", self$migration_rate))
+        print(paste("Speciation rate:", self$speciation_rate))
       }
       else if (values == "all"){
         if (is.null(self$local_cm) == FALSE)
@@ -290,13 +318,13 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       }
       else
         warning("Values not recognized. Please use 'basic' or 'all'")
-    },
-
-    #' @description
-    #' DRAFT
-    #TODO
-    count_species = function() {
-      self$species_count <- table(unlist(self$run_patterns))
+    #' },
+    #'
+    #' #' @description
+    #' #' DRAFT
+    #' #TODO
+    #' count_species = function() {
+    #'   self$species_count <- table(unlist(self$run_patterns))
     }
 )
 )
