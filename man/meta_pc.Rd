@@ -75,8 +75,8 @@ Meta community default community drawing - add migr/spec_rate in the matrix
   sd = 1,
   prob = 0.1,
   theta = 40,
-  migration_rate = 0.05,
-  speciation_rate = 0.001
+  migration_rate = self$migration_rate,
+  speciation_rate = self$speciation_rate
 )}\if{html}{\out{</div>}}
 }
 

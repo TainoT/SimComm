@@ -112,7 +112,7 @@ community_param <- R6::R6Class("community_param",
       )
       # are we sure we need to add that name ? this is confusing rn
       # i can send the_matrix right away and let the next function deal with it
-#-----class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
+      # class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       return(self$the_matrix)
     },
 

@@ -20,6 +20,10 @@ myModel$autoplot()
 
 \item{\code{timeline}}{A numeric vector.}
 
+\item{\code{event}}{The time of disturbance.}
+
+\item{\code{kill_rate}}{The rate of disturbance.}
+
 \item{\code{last_time}}{The last time (in the time line) the model has been run.}
 
 \item{\code{run_patterns}}{The past patterns of the model, obtained by \code{run} and saved.}

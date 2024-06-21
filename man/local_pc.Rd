@@ -60,9 +60,6 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \if{latex}{\out{\hypertarget{method-local_pc-make_local}{}}}
 \subsection{Method \code{make_local()}}{
 Local community default community drawing - add death/birth_rate in the matrix
-TODO : Verify if defaulting values in argument is right
-I could do an option and make a set_value ?
-strengthen the code, verify if the rates are on same level IN the matrix
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{local_pc$make_local(
   nx = 10,
@@ -72,8 +69,7 @@ strengthen the code, verify if the rates are on same level IN the matrix
   sd = 1,
   prob = 0.1,
   theta = 40,
-  death_rate = 0.1,
-  birth_rate = 0.2,
+  death_rate = self$death_rate,
   fashion = "matrix"
 )}\if{html}{\out{</div>}}
 }

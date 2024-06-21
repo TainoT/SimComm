@@ -23,34 +23,21 @@ Edge effects are eliminated by a toroidal correction. (??? check that out)
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{death_rate}}{The mortality rate of an individual.
-Default is \code{0.1}}
-
-\item{\code{birth_rate}}{The reproduction rate of an individual.
-Default is \code{0.2}}
+Default is \code{0.1}
+#' @field kill_rate The disturbance rate of an individual.
+#' Default is \code{1}}
 
 \item{\code{migration_rate}}{The reproduction rate of an individual.
-Default is \code{0.05}}
+Default is \code{0.005}}
 
 \item{\code{speciation_rate}}{The reproduction rate of an individual.
 Default is \code{0.0001}}
 
-\item{\code{community}}{The matrix local community}
+\item{\code{local_cm}}{The matrix local community}
 
-\item{\code{metacom}}{The meta community}
+\item{\code{meta_cm}}{The matrix meta community}
 
-\item{\code{new_sp}}{Iteration number on speciation to create a new species each time}
-}
-\if{html}{\out{</div>}}
-}
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{birth_rate}}{The reproduction rate of an individual.
-Default is \code{0.2}}
-
-\item{\code{community}}{The matrix local community}
-
-\item{\code{metacom}}{The meta community}
+\item{\code{model}}{The model to use}
 }
 \if{html}{\out{</div>}}
 }
@@ -58,6 +45,7 @@ Default is \code{0.2}}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-cm_hubbell-new}{\code{cm_hubbell$new()}}
+\item \href{#method-cm_hubbell-show_values}{\code{cm_hubbell$show_values()}}
 \item \href{#method-cm_hubbell-count_species}{\code{cm_hubbell$count_species()}}
 \item \href{#method-cm_hubbell-clone}{\code{cm_hubbell$clone()}}
 }
@@ -81,7 +69,10 @@ Default is \code{0.2}}
 \if{html}{\out{<a id="method-cm_hubbell-new"></a>}}
 \if{latex}{\out{\hypertarget{method-cm_hubbell-new}{}}}
 \subsection{Method \code{new()}}{
-distrub the community at given time and replace the dead cells with the neighbors
+community evolution rules for the neutral theory model
+
+
+disturb the community at given time and replace the dead cells with the neighbors
 
 
 Create a new instance of this \link[R6:R6Class]{R6} class.
@@ -92,10 +83,12 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
   type = "Species",
   neighborhood = "Moore 1",
   global_pattern = NULL,
-  model = "default",
-  death_rate = 0.1,
-  migration_rate = 0.005,
-  speciation_rate = 0.001
+  model = model,
+  death_rate = self$death_rate,
+  disturbance_rate = self$kill_rate,
+  event = NULL,
+  migration_rate = self$migration_rate,
+  speciation_rate = self$speciation_rate
 )}\if{html}{\out{</div>}}
 }
 
@@ -116,11 +109,20 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cm_hubbell-show_values"></a>}}
+\if{latex}{\out{\hypertarget{method-cm_hubbell-show_values}{}}}
+\subsection{Method \code{show_values()}}{
+Show the values of the model
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$show_values(values = "basic")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cm_hubbell-count_species"></a>}}
 \if{latex}{\out{\hypertarget{method-cm_hubbell-count_species}{}}}
 \subsection{Method \code{count_species()}}{
 DRAFT
-TODO
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$count_species()}\if{html}{\out{</div>}}
 }

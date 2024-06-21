@@ -177,7 +177,13 @@ Its value should be in \code{timeline}.}
 \subsection{Method \code{graph()}}{
 Produces the graphs
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$graph(time = 1, graph = NULL, keep = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$graph(
+  time = 1,
+  graph = NULL,
+  keep = NULL,
+  community = NULL,
+  save = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -186,7 +192,8 @@ Produces the graphs
 \item{\code{time}}{The point of the timeline considered.
 Its value should be in \code{timeline}.}
 
-\item{\code{...}}{Extra arguments to be passed to methods.}
+\item{\code{save}}{if \code{TRUE}, the evolution of the model is saved.
+if \code{FALSE}, only the final step is saved.}
 }
 \if{html}{\out{</div>}}
 }
