@@ -38,6 +38,9 @@ community_param <- R6::R6Class("community_param",
     prob = NULL,
     alpha = NULL,
 
+    distribute = NULL,
+    style = NULL,
+
     the_matrix = NULL,
     the_wmppp = NULL,
 
@@ -67,6 +70,11 @@ community_param <- R6::R6Class("community_param",
       self$sd = sd
       self$prob = prob
       self$alpha = alpha
+
+      if (!is.null(self$the_matrix))
+        self$the_matrix <- self$draw_matrix()
+      else if (!is.null(self$the_wmppp))
+        self$the_wmppp <- self$draw_wmppp()
     },
 
     #' @description
@@ -87,31 +95,76 @@ community_param <- R6::R6Class("community_param",
     #' @description
     #' Draw a community with no adjectives
     draw_matrix = function(){
-      the_community <- entropart::rCommunity(
-      1,
-      #bit64::as.integer64 is an option here if we want to handle bigger numbers
-      size = 100 * self$nx * self$ny,
-      S = self$S,
-      Distribution = self$Distribution,
-      sd = self$sd,
-      prob = self$prob,
-      alpha = self$alpha,
-      CheckArguments = FALSE
-    )
+      if (self$distribute != "entropart" && self$distribute != "random" && self$distribute != "uniform") {
+        self$distribute <- "entropart"
+        warning("No defined distribution, defaulting to entropart")
+      }
+
+      if (self$distribute == "entropart") {
+        the_community <- entropart::rCommunity(
+          1,
+          #bit64::as.integer64 is an option here if we want to handle bigger numbers
+          size = 100 * self$nx * self$ny,
+          S = self$S,
+          Distribution = self$Distribution,
+          sd = self$sd,
+          prob = self$prob,
+          alpha = self$alpha,
+          CheckArguments = FALSE)
+      }
+      else if (self$distribute == "random") {
+        #TODO rethink the mean, why should i stick to 100 ?
+        the_community <- rnorm(self$S, mean = 100, sd = 10)
+      }
+      else if (self$distribute == "uniform") {
+        indiv_species <- (self$nx * self$ny) / self$S
+        if (indiv_species %% 1 != 0) {
+          #numbers::divisors is an option to get the divisors
+          stop("The number of species is not a multiple of the number of individuals")}
+        species <- rep(1:self$S, each = indiv_species)
+        the_community <- species
+      }
+      else
+        stop("No defined distribution")
+
       # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
       # while it affects graphics, verify affects on plots, thats more important
       spNames <- seq(length(the_community))
       # Make a matrix, thats the matrix we sending and that should be studied
       # TODO : scrap that out for the meta com, i think, check performances
       self$the_matrix <- NULL
-      self$the_matrix <- matrix(
-        sample(spNames, size = self$nx * self$ny, replace = TRUE,
-               prob = the_community / sum(the_community)),
-        nrow = self$ny,
-        ncol = self$nx
-      )
-      # are we sure we need to add that name ? this is confusing rn
-      # i can send the_matrix right away and let the next function deal with it
+      if (self$style != "checkerboard" && self$style != "random" && self$style != "uniform") {
+        self$style <- "random"
+        warning("No defined style, defaulting to random")
+      }
+      if (self$style == "random") {
+        spNames <- seq(length(the_community))
+        self$the_matrix <- matrix(
+          sample(spNames, size = self$nx * self$ny, replace = TRUE,
+                 prob = the_community / sum(the_community)),
+          nrow = self$ny,
+          ncol = self$nx
+        )
+      }
+      else if (self$style == "uniform")
+        self$the_matrix <- matrix(
+          the_community,
+          # rep(sample(spNames, size = self$nx * self$ny, replace = TRUE),
+              # each = self$nx * self$ny / self$S),
+          nrow = self$ny,
+          ncol = self$nx
+        )
+      else if (self$style == "checkerboard") {
+        self$the_matrix <- matrix(nrow = self$ny, ncol = self$nx)
+        for (i in 1:self$nx) {
+          for (j in 1:self$ny) {
+            individual = (i + j) %% self$S
+            # if (individual == 0)
+              # individual = self$S
+            self$the_matrix[j, i] <- individual
+          }
+        }
+      }
       # class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       return(self$the_matrix)
     },
@@ -164,8 +217,12 @@ local_pc <- R6::R6Class("local_pc",
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(fashion = "matrix",
-        death_rate = self$death_rate){
+        death_rate = self$death_rate,
+        distribute = "entropart",
+        style = "random"){
       self$death_rate <- death_rate
+      self$distribute <- distribute
+      self$style <- style
       if (fashion == "matrix"){
         self$the_matrix <- self$make_local(fashion = fashion)
       }
@@ -241,10 +298,13 @@ meta_pc <- R6::R6Class("meta_pc",
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function(
         migration_rate = self$migration_rate,
-        speciation_rate = self$speciation_rate
-        ){
+        speciation_rate = self$speciation_rate,
+        distribute = "entropart",
+        style = "random") {
       self$migration_rate <- migration_rate
       self$speciation_rate <- speciation_rate
+      self$distribute <- distribute
+      self$style <- style
       self$the_matrix <- self$make_meta()
     },
 
