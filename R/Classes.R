@@ -513,6 +513,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' "Global" or "0" for all cells.
     neighborhood = NULL,
     data_gen = NULL,
+    is_synth = FALSE,
     # the_neighbors = NULL,
 
     #' @description
@@ -621,7 +622,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         ylab = "",
         axes = FALSE,
         asp = 1,
-        col = hcl.colors(12, "YlOrRd", rev = TRUE),
+        col = colorspace::rainbow_hcl(12),#hcl.colors(12, "Viridis", rev = TRUE),
       ...)
       if (sleep > 0) animation::ani.pause(sleep)
     },
@@ -651,7 +652,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' @description
     #' Produces the graphs
     #TODO add option to chose which community to plot (community = local/meta)
-    graph = function(time = 1, graph = NULL, keep = NULL, community = NULL, save = NULL) {
+    synthesis = function(keep = NULL, community = NULL, save = NULL) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
@@ -663,13 +664,24 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
           species_data <- as.data.frame(table(self$saved_pattern(i)))
           species_data$time <- i
           #TODO
+          species_data$neighbors <- 0
           for (c in species_data[species_data$time == i, "Var1"]) {
+            same_neighbors <- 0
+            total_cell <- 0
             for (x in 1:nrow(self$saved_pattern(i))) {
               for (y in 1:ncol(self$saved_pattern(i))) {
-                if (self$saved_pattern(i)[x,y] == c)
-                  species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) # / length(self$neighbors(x, y))
+                if (self$saved_pattern(i)[x,y] == c) {
+                  neighbors <- self$neighbors(x, y)
+                  same_neighbors <- same_neighbors + sum(neighbors == c)
+                  total_cell <- total_cell + 1
+                }
+                  # species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) # / length(self$neighbors(x, y))
                 # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
               }
+            }
+            if (total_cell > 0) {
+            avg_neighbors <- same_neighbors / total_cell#sum(self$saved_pattern(i) == c)
+            species_data$neighbors[species_data$Var1 == c] <- avg_neighbors / length(self$neighbors(x, y))
             }
           }
           data_list[[i]] <- species_data
@@ -691,28 +703,75 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         print("writing data_gen.csv")
         write.csv(self$data_gen, "data_gen.csv")
       }
-      if (isTRUE(graph == "all")) {
-        overall_abundance_rank(data = self$data_gen)
-        timed_abundance(time = time, data = self$data_gen)
-        timed_relative_abundance(time = time, data = self$data_gen)
-        overall_abundance_distribution(data = self$data_gen)
-        relative_abundance_rank(data = self$data_gen)
+
+      self$is_synth <- TRUE
+    },
+
+    #' @description
+    #' Produces the graphs
+    graph = function(graph = "all", time = 1) {
+      if (isFALSE(self$is_synth)) {
+        stop("Nothing to plot. Synthesize the data first.")
       }
-      else if (isTRUE(graph == "overall_abundance_rank")) {
-        overall_abundance_rank(data = self$data_gen)
+      if (graph == "all") {
+        lapply(names(map_of_graphs), function(x) {
+          func <- map_of_graphs[[x]]
+          if ("time" %in% names(formals(func))) {
+            func(data = self$data_gen, time = time)
+          } else {
+            func(data = self$data_gen)
+          }
+      })
       }
-      else if (isTRUE(graph == "timed_abundance")) {
-        timed_abundance(time = time, data = self$data_gen)
+      else if (graph %in% names(map_of_graphs)) {
+        func <- map_of_graphs[[graph]]
+        if ("time" %in% names(formals(func))) {
+          map_of_graphs[[graph]](data = self$data_gen, time = time)
+        } else {
+          map_of_graphs[[graph]](data = self$data_gen)
+        }
       }
-      else if (isTRUE(graph == "timed_relative_abundance")) {
-        timed_relative_abundance(time = time, data = self$data_gen)
+      else
+        stop("The graph argument is not recognized.")
       }
-      else if (graph == "overall_abundance_distribution") {
-        overall_abundance_distribution(data = self$data_gen)
-      }
-      else if (graph == "relative_abundance_rank") {
-        relative_abundance_rank(data = self$data_gen)
-      }
-    }
+      # if (isTRUE(graph == "all")) {
+      #   overall_abundance_rank(data = self$data_gen)
+      #   timed_abundance(time = time, data = self$data_gen)
+      #   timed_relative_abundance(time = time, data = self$data_gen)
+      #   overall_abundance_distribution(data = self$data_gen)
+      #   relative_abundance_rank(data = self$data_gen)
+      # }
+      # else if (graph == "overall_abundance_rank") {
+      #   overall_abundance_rank(data = self$data_gen)
+      # }
+      # else if (graph == "timed_abundance") {
+      #   timed_abundance(time = time, data = self$data_gen)
+      # }
+      # else if (graph == "timed_relative_abundance") {
+      #   timed_relative_abundance(time = time, data = self$data_gen)
+      # }
+      # else if (graph == "overall_abundance_distribution") {
+      #   overall_abundance_distribution(data = self$data_gen)
+      # }
+      # else if (graph == "relative_abundance_rank") {
+      #   relative_abundance_rank(data = self$data_gen)
+      # }
+      # else if (graph == "neighbors_rank") {
+      #   neighbors_rank(data = self$data_gen)
+      # }
+      # else if (graph == "neighbors_time") {
+      #   neighbors_time(data = self$data_gen)
+      # }
+      # else if (graph == "neighbors_abundance") {
+      #   neighbors_abundance(data = self$data_gen)
+      # }
+      # else if (graph == "neighbors_abundance_time") {
+      #   neighbors_abundance_time(data = self$data_gen)
+      # }
+      # else if (graph == "blablabla") {
+      #   blablabla(data = self$data_gen)
+      # }
+      # else {
+      #   stop("The graph argument is not recognized.")
   )
 )

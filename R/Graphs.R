@@ -157,3 +157,163 @@ relative_abundance_rank <- function(
   print(g)
 }
 
+#' @rdname neighors_rank
+#'
+#' @export
+# make a function that plot the neighbors for all species by rank over time
+neighbors_rank <- function(
+    data = NULL) {
+  if (is.null(data))
+    stop("Data frame is missing")
+
+  g <- ggplot(data, aes(x = rank, y = neighbors, color = factor(species))) +
+    geom_point(size = 2) +
+    geom_line(aes(group = species), linetype = "dashed") +
+    labs(title = "Rank and Neighbors over time",
+         x = "Rank", y = "Neighbors",
+         color = "Species") +
+    theme_minimal()
+  print(g)
+}
+
+#' @rdname neighbors_time
+#'
+#' @export
+neighbors_time <- function(
+    data = NULL) {
+  if (is.null(data))
+    stop("Data frame is missing")
+
+  g <- ggplot(data, aes(x = time, y = neighbors, color = factor(species))) +
+    geom_point(size = 2) +
+    geom_line(aes(group = species)) +
+    labs(title = "Time and Neighbors per species",
+         x = "Time", y = "Neighbors",
+         color = "Species") +
+    theme_minimal()
+  print(g)
+}
+
+#' @rdname neighbors_abundance
+#'
+#' @export
+neighbors_abundance <- function(
+    data = NULL) {
+  if (is.null(data))
+    stop("Data frame is missing")
+
+  g <- ggplot(data, aes(x = count, y = neighbors, color = factor(species))) +
+    geom_point(size = 2) +
+    geom_line(aes(group = species), linetype = "dashed") +
+    geom_smooth(method = "lm", se = FALSE) +
+    labs(title = "Abundance and Neighbors",
+         x = "Abundance", y = "Neighbors",
+         color = "Species") +
+    theme_minimal()
+  print(g)
+}
+
+#' @rdname neighbors_abundance_time
+#'
+#' @export
+neighbors_abundance_time <- function(
+    data = NULL) {
+  if (is.null(data))
+    stop("Data frame is missing")
+
+  g <- ggplot(data, aes(x = time)) +
+    geom_line(aes(y = count, color = factor(species)), size = 1) +
+    geom_point(aes(y = count, color = factor(species)), size = 1) +
+    scale_y_continuous(name = "Abundance") +
+    labs(title = "Abundance over time",
+         x = "Time",
+         color = "Species") +
+    theme_minimal()
+
+  g <- g +
+    geom_line(aes(y = neighbors * max(data$count) / max(data$neighbors),
+                 color = factor(species)), linetype = "dashed") +
+    geom_point(aes(y = neighbors * max(data$count) / max(data$neighbors),
+                  color = factor(species)), shape = 1, size = 1) +
+    scale_y_continuous(
+      sec.axis = sec_axis(~ . * max(data$neighbors) / max(data$count),
+                          name = "Neighbors")
+    )
+  print(g)
+}
+
+
+blablabla <- function(
+    data = NULL) {
+  if (is.null(data))
+    stop("Data frame is missing")
+
+  ggplot(data, aes(x = time, y = neighbors, color = factor(species))) +
+    geom_point(size = 3) +
+    geom_line(aes(group = species)) +
+    labs(
+      title = "Relationship between Neighbors and Time, grouped by Species",
+      x = "Time",
+      y = "Average Number of Same-species Neighbors",
+      color = "Species"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5),
+      legend.position = "bottom"
+    )
+
+  # Plot with dual y-axes
+  ggplot() +
+    geom_line(data = data, aes(x = time, y = count, color = factor(species)), size = 1) +
+    geom_point(data = data, aes(x = time, y = count, color = factor(species)), size = 3) +
+    scale_y_continuous(name = "Abundance (Count)", sec.axis = sec_axis(~ . * max(data$neighbors) / max(data$count), name = "Average Number of Same-species Neighbors")) +
+    geom_line(data = data, aes(x = time, y = neighbors * max(data$count) / max(data$neighbors), color = factor(species)), linetype = "dashed") +
+    geom_point(data = data, aes(x = time, y = neighbors * max(data$count) / max(data$neighbors), color = factor(species)), shape = 1, size = 3) +
+    labs(
+      title = "Abundance and Neighbors over Time",
+      x = "Time",
+      color = "Species"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5),
+      legend.position = "bottom"
+    )
+}
+
+
+#' @rdname map_of_graphs
+#'
+#' @export
+map_of_graphs <- list(
+  "timed_abundance" = timed_abundance,
+  "timed_relative_abundance" = timed_relative_abundance,
+  "overall_abundance_distribution" = overall_abundance_distribution,
+  "overall_abundance_rank" = overall_abundance_rank,
+  "relative_abundance_rank" = relative_abundance_rank,
+  "neighbors_rank" = neighbors_rank,
+  "neighbors_time" = neighbors_time,
+  "neighbors_abundance" = neighbors_abundance,
+  "neighbors_abundance_time" = neighbors_abundance_time,
+  "blablabla" = blablabla
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
