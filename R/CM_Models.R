@@ -146,7 +146,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       }
 
       # Prep the model
-      if (isTRUE(self$model == "local"))
+      if (self$model == "local")
         self$migration_rate <- 0
       # Change cells
       for(row in seq(nrow(self$pattern))) {
@@ -208,7 +208,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # Change cells to fill the 0 with the neighbors
       for (row in seq(nrow(self$pattern))) {
         for (col in seq(ncol(self$pattern))) {
-          if (isTRUE(self$pattern[row, col] == 0)) {
+          if (self$pattern[row, col] == 0) {
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           }
         }
@@ -278,21 +278,35 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       #TODO BY DEFAULT, no pattern is given, we create communities
       # We're creating the local community model
-      if (isTRUE(self$model == "local")) {
-        self$local_cm <- local_pc$new(death_rate = self$death_rate,
-                                      fashion = "matrix")
-      } else if (isTRUE(self$model == "meta")) {
-        self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
-                                    speciation_rate = self$speciation_rate)
-      } else {
-        if (isTRUE(self$model == "default")) {
+
+      if (self$model == "local") {
+        if (is.null(local_pattern))
           self$local_cm <- local_pc$new(death_rate = self$death_rate,
-                                        fashion = "matrix")
+                                      fashion = "matrix")
+        else
+          self$local_cm <- local_pattern
+      }
+      else if (self$model == "meta") {
+        if (is.null(global_pattern))
           self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
+                                    speciation_rate = self$speciation_rate)
+        else
+          self$meta_cm <- global_pattern
+      }
+      else if (self$model == "default") {
+          if (is.null(local_pattern))
+            self$local_cm <- local_pc$new(death_rate = self$death_rate,
+                                        fashion = "matrix")
+          else
+            self$local_cm <- local_pattern
+          if (is.null(global_pattern))
+            self$meta_cm <- meta_pc$new(migration_rate = self$migration_rate,
                                       speciation_rate = self$speciation_rate)
-        } else {
+          else
+            self$meta_cm <- global_pattern
+      }
+      else {
           stop("Model not recognized. Please use 'local', 'meta' or 'default'")
-        }
       }
 
       # We store the result of that community in pattern for further control
