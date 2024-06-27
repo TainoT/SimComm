@@ -71,10 +71,10 @@ community_param <- R6::R6Class("community_param",
       self$prob = prob
       self$alpha = alpha
 
-      if (!is.null(self$the_matrix))
-        self$the_matrix <- self$draw_matrix()
-      else if (!is.null(self$the_wmppp))
-        self$the_wmppp <- self$draw_wmppp()
+      # if (!is.null(self$the_matrix))
+      #   self$the_matrix <- self$draw_matrix()
+      # else if (!is.null(self$the_wmppp))
+      #   self$the_wmppp <- self$draw_wmppp()
     },
 
     #' @description
@@ -129,6 +129,7 @@ community_param <- R6::R6Class("community_param",
 
       # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
       # while it affects graphics, verify affects on plots, thats more important
+
       spNames <- seq(length(the_community))
       # Make a matrix, thats the matrix we sending and that should be studied
       # TODO : scrap that out for the meta com, i think, check performances
@@ -150,7 +151,7 @@ community_param <- R6::R6Class("community_param",
         self$the_matrix <- matrix(
           the_community,
           # rep(sample(spNames, size = self$nx * self$ny, replace = TRUE),
-              # each = self$nx * self$ny / self$S),
+          # each = self$nx * self$ny / self$S),
           nrow = self$ny,
           ncol = self$nx
         )
@@ -160,11 +161,12 @@ community_param <- R6::R6Class("community_param",
           for (j in 1:self$ny) {
             individual = (i + j) %% self$S
             # if (individual == 0)
-              # individual = self$S
+            # individual = self$S
             self$the_matrix[j, i] <- individual
           }
         }
       }
+
       # class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       return(self$the_matrix)
     },
