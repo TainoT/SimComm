@@ -514,7 +514,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     neighborhood = NULL,
     data_gen = NULL,
     is_synth = FALSE,
-    # the_neighbors = NULL,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -530,8 +529,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         self$neighborhood <- "von Neumann 1"
         warning("The neighborhood definition was not recognized: set to the default value.")
       }
-      #TODO Colors for plot()
-      # self$cols <- grDevices::rainbow(max(pattern))
     },
 
     #' @description
@@ -602,14 +599,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
       return(the_neighbors)
     },
 
-    #TODO---
-    same_neighbors = function(row, col, species) {
-      # write a function that returns the number of neighbors of the same species
-      # for a given cell
-      the_neighbors <- self$neighbors(row, col)
-      return(sum(the_neighbors == species))
-    },
-
     #' @description
     #' Plots the pattern.
     plot = function(time = NULL, sleep=0, ...) {
@@ -622,7 +611,7 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         ylab = "",
         axes = FALSE,
         asp = 1,
-        col = colorspace::rainbow_hcl(12),#hcl.colors(12, "Viridis", rev = TRUE),
+        col = colorspace::rainbow_hcl(12),
       ...)
       if (sleep > 0) animation::ani.pause(sleep)
     },
@@ -651,13 +640,10 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
 
     #' @description
     #' Produces the graphs
-    #TODO add option to chose which community to plot (community = local/meta)
-    # it should ignore the pattern thing and go straight to the table itself
     synthesis = function(keep = NULL, community = NULL, save = NULL, calc_neighbors = TRUE) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
-      #TODO add more index to the data_gen, diversity, neighbors, etc
       if (is.null(self$data_gen) || isTRUE(self$redraw)) {
         data_list <- vector("list", length(self$timeline) - 1)
 
@@ -667,11 +653,10 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
           species_data <- as.data.frame(table(pattern))
           species_data$time <- i
 
-          #TODO
           if (calc_neighbors) {
             species_data$neighbors <- 0
 
-            for (c in species_data$pattern) {#species_data[species_data$time == i, "Var1"]) {#
+            for (c in species_data$pattern) {
               same_neighbors <- 0
               total_cell <- 0
               for (x in 1:nrow(pattern)) {
@@ -681,15 +666,12 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
                     same_neighbors <- same_neighbors + sum(neighbors == c)
                     total_cell <- total_cell + length(neighbors) #+1 ?
                   }
-                  # species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) # / length(self$neighbors(x, y))
-                  # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
                 }
               }
               if (total_cell > 0) {
-                avg_neighbors <- same_neighbors / total_cell#sum(self$saved_pattern(i) == c)
-                species_data$neighbors[species_data$pattern == c] <- avg_neighbors #/ length(self$neighbors(x,y))
+                avg_neighbors <- same_neighbors / total_cell
+                species_data$neighbors[species_data$pattern == c] <- avg_neighbors
               }
-              # print(paste("Species:", c, "Same Neighbors:", same_neighbors, "Total Cells:", total_cell, "Avg Neighbors:", avg_neighbors))
             }
           }
           data_list[[i]] <- species_data

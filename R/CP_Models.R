@@ -47,7 +47,6 @@ cp_drift <- R6::R6Class("cp_drift",
   )
 )
 
-#TODO redo that documentation properly
 #' Hubbell's Neutral Theory Integration Class
 #'
 #' A [community_scpmodel] where each point contains an individual of one species.

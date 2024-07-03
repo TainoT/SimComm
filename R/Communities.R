@@ -50,8 +50,6 @@ community_param <- R6::R6Class("community_param",
 
     #' @description
     #' Set values of the community generation parameters (set to default if no arguments)
-    #TODO set_values should be defaulting t
-    #'
     set_values = function(
     nx = 20,
     ny = nx,
@@ -118,7 +116,6 @@ community_param <- R6::R6Class("community_param",
           CheckArguments = FALSE)
       }
       else if (self$distribute == "random") {
-        #TODO rethink the mean, why should i stick to 100 ?
         the_community <- rnorm(self$S, mean = 100, sd = 10)
       }
       else if (self$distribute == "uniform") {
@@ -132,12 +129,7 @@ community_param <- R6::R6Class("community_param",
       else
         stop("No defined distribution")
 
-      # Names are numbers, find a way to make it better, red and white shouldnt become orange when one dies
-      # while it affects graphics, verify affects on plots, thats more important
-
       spNames <- seq(length(the_community))
-      # Make a matrix, thats the matrix we sending and that should be studied
-      # TODO : scrap that out for the meta com, i think, check performances
       self$the_matrix <- NULL
       if (self$style != "checkerboard" && self$style != "random" && self$style != "uniform") {
         self$style <- "random"
@@ -165,15 +157,10 @@ community_param <- R6::R6Class("community_param",
         for (i in 1:self$nx) {
           for (j in 1:self$ny) {
             individual = (i + j) %% self$S
-            # if (individual == 0)
-            # individual = self$S
             self$the_matrix[j, i] <- individual
           }
         }
       }
-
-
-      # class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       return(self$the_matrix)
     },
 
@@ -183,7 +170,7 @@ community_param <- R6::R6Class("community_param",
       spNames <- seq(self$S)
       the_community <- SpatDiv::rSpCommunity(
         1,
-        size = self$nx * self$ny,#100 * self$nx * self$ny,
+        size = self$nx * self$ny,
         S = self$S,
         Distribution = self$Distribution,
         sd = self$sd,
@@ -191,15 +178,9 @@ community_param <- R6::R6Class("community_param",
         alpha = self$alpha,
         CheckArguments = FALSE
       )
-
-      # TODO I need to SAMPLE the community from 100 * x * y to a size of 100
       self$the_wmppp <- the_community
-      # self$the_wmpp <- matrix()
       return(self$the_wmppp)
-      # self$the_wmppp <- the_community
     }
-
-
   )
 )
 
@@ -220,7 +201,7 @@ local_pc <- R6::R6Class("local_pc",
   public = list(
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
-    death_rate = 0.11,
+    death_rate = 0.1,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -241,12 +222,8 @@ local_pc <- R6::R6Class("local_pc",
         stop("No defined fashion")
     },
 
-
     #' @description
-    #' Local community default community drawing - add death/birth_rate in the matrix
-    #TODO : Verify if defaulting values in argument is right
-    #              I could do an option and make a set_value ?
-    #             strengthen the code, verify if the rates are on same level IN the matrix
+    #' Local community default community drawing - add death_rate
     make_local = function(
     nx = 10,
     ny = nx,
@@ -259,7 +236,6 @@ local_pc <- R6::R6Class("local_pc",
     fashion = "matrix",
     distribute = "entropart",
     style = "random") {
-      # We're NOT drawing the matrix
       self$set_values(nx = nx, ny = ny, S = S,
                       Distribution = Distribution, sd = sd,
                       prob = prob, alpha = alpha, distribute = distribute, style = style)
@@ -280,9 +256,6 @@ local_pc <- R6::R6Class("local_pc",
   )
 )
 
-# TODO for 19/04, keep working on making sure this code is rock solid, then open up to meta community
-# with options and all that
-
 #' Meta community
 #'
 #' @description The class generate a meta community of a large number of species.
@@ -300,10 +273,10 @@ meta_pc <- R6::R6Class("meta_pc",
   public = list(
     #' @field migration_rate The migration of an individual.
     #' Default is `0.005`
-    migration_rate = 0.0055,
+    migration_rate = 0.005,
     #' @field speciation_rate The speciation rate of an individual
     #' Default is `0.00001`
-    speciation_rate = 0.000011,
+    speciation_rate = 0.00001,
 
     #' @description
     #' Create a new instance of this [R6][R6::R6Class] class.
@@ -324,7 +297,7 @@ meta_pc <- R6::R6Class("meta_pc",
     make_meta = function(
     nx = 100,
     ny = nx,
-    S = 100, #TODO : use Fisher's to get a proper N number here
+    S = 100,
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
@@ -341,9 +314,6 @@ meta_pc <- R6::R6Class("meta_pc",
                       prob = prob, alpha = alpha)
       self$the_matrix <- NULL
       self$the_matrix <- self$draw_matrix()
-
-      #TODO remove the first str from the inherit but is that necessary to have that ?
-#-----class(self$the_matrix) <- c("make_meta", class(self$the_matrix), migration_rate)
 
       return(self$the_matrix)
     }

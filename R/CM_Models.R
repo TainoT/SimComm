@@ -30,9 +30,6 @@ cm_drift <- R6::R6Class("cm_drift",
   )
 )
 
-
-
-
 #' Conway's game of life
 #'
 #' A [community_matrixmodel] where each cell contains or not an individual.
@@ -113,9 +110,9 @@ cm_Conway <- R6::R6Class("cm_Conway",
 #' @docType class
 #' @param neighborhood A character string defining what is the neighborhood of a cell:
 #' "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
-#' "Moore 1 or 8" for all adjacent cells (the first four and North-West, etc.);
-#' "Moore 2 or 24" for two rings of neighbors.
-#' "Global or 0" for the whole matrix as neighborhood.
+#' "Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
+#' "Moore 2" or "24" for two rings of neighbors.
+#' "Global" or "0" for the whole matrix as neighborhood.
 #' @param pattern The pattern which describe the location of agents.
 #' @param time The point of the timeline considered.
 #' Its value should be in `timeline`
@@ -140,7 +137,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
           local_id <- self$next_local_id
           self$species_mapping[[as.character(meta_species)]] <- local_id
           self$next_local_id <- self$next_local_id + 1
-          # self$species_mapping[as.character(meta_species]] <- self$next_local_id
           return(local_id)
         }
       }
@@ -158,19 +154,19 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
             meta_species <- sample(self$meta_cm$the_matrix, size = 1)
             local_species <- get_or_assign_local_id(meta_species)
             self$pattern[row, col] <- local_species
-            # self$pattern[row, col] <- sample(self$meta_cm$the_matrix, size = 1)
           }
           # Death happens only in the local community, subtracted from the migration rate
           else if ((self$model == "default" || self$model == "local")
                    && r < self$death_rate - self$migration_rate) {
             self$pattern[row, col] <- sample(self$neighbors(row, col), size = 1)
           }
-          # Nothing happens here
+          # Nothing happens
           else
             self$pattern[row, col] <- self$pattern[row, col]
           }
-        }
+      }
 
+      # Speciation happens only in the meta community
       if (self$model == "default" || self$model == "meta") {
         new_speciation <- runif(length(self$meta_cm$the_matrix), 0, 1)
         new_speciation <- sum(new_speciation < self$speciation_rate)
@@ -178,7 +174,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
             new_species <- self$next_local_id
             self$species_mapping[[as.character(new_species)]] <- new_species
             self$next_local_id <- self$next_local_id + 1
-            print(paste("Speciation: ", new_species))
         }
       }
 
@@ -196,13 +191,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
 
       # Store matrix in pattern
       self$pattern <- self$saved_pattern(time)# - 1)
-      # Make n cell in pattern as NA
-      # if (is.null(cell)) {
-      #   cell = self$nx
-      #   warning("No cell number given, default to length of the pattern")
-      # }
-      # else
-      #   cell = self$disturbance_rate
       self$pattern[sample(1:length(self$pattern), self$disturbance_rate)] <- 0
 
       # Change cells to fill the 0 with the neighbors
@@ -272,12 +260,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       self$speciation_rate <- speciation_rate
       self$species_mapping <- list()
 
-      # TODO : add whatever I want here when I create a neutral theory model
-      #        - the species count
-
-      #TODO BY DEFAULT, no pattern is given, we create communities
-      # We're creating the local community model
-
       if (self$model == "local") {
         if (is.null(local_pattern))
           self$local_cm <- local_pc$new(death_rate = self$death_rate,
@@ -307,6 +289,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       else {
           stop("Model not recognized. Please use 'local', 'meta' or 'default'")
       }
+
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
       self$next_local_id <- max(self$pattern) + 1
@@ -330,14 +313,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       }
       else
         warning("Values not recognized. Please use 'basic' or 'all'")
-    #' },
-    #'
-    #' #' @description
-    #' #' DRAFT
-    #' #TODO
-    #' count_species = function() {
-    #'   self$species_count <- table(unlist(self$run_patterns))
     }
-)
+  )
 )
 
