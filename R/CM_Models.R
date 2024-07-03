@@ -168,17 +168,17 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
           # Nothing happens here
           else
             self$pattern[row, col] <- self$pattern[row, col]
-          # Speciation happens only in the meta community
-          if ((self$model == "default" || self$model == "meta")
-              && r < self$speciation_rate) {
-            #TODO
-            # add a new species to the meta community
+          }
+        }
+
+      if (self$model == "default" || self$model == "meta") {
+        new_speciation <- runif(length(self$meta_cm$the_matrix), 0, 1)
+        new_speciation <- sum(new_speciation < self$speciation_rate)
+        for (i in 1:new_speciation) {
             new_species <- self$next_local_id
-            self$pattern[row, col] <- new_species
             self$species_mapping[[as.character(new_species)]] <- new_species
             self$next_local_id <- self$next_local_id + 1
-            print("Speciation")
-          }
+            print(paste("Speciation: ", new_species))
         }
       }
 
@@ -203,7 +203,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       # }
       # else
       #   cell = self$disturbance_rate
-      self$pattern[sample(1:length(self$pattern), self$kill_rate)] <- 0
+      self$pattern[sample(1:length(self$pattern), self$disturbance_rate)] <- 0
 
       # Change cells to fill the 0 with the neighbors
       for (row in seq(nrow(self$pattern))) {
@@ -224,9 +224,9 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
-    #' #' @field kill_rate The disturbance rate of a community.
+    #' #' @field disturbance_rate The disturbance rate of a community.
     #' #' Default is `1`
-    kill_rate = 0,
+    disturbance_rate = 0,
     #' @field migration_rate The migration rate of an individual.
     #' Default is `0.005`
     migration_rate = 0.005,
@@ -254,7 +254,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
         global_pattern = NULL,
         model = self$model,
         death_rate = self$death_rate,
-        disturbance_rate = self$kill_rate,
+        disturbance_rate = self$disturbance_rate,
         event = NULL,
         migration_rate = self$migration_rate,
         speciation_rate = self$speciation_rate) {
@@ -266,12 +266,11 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       )
       self$model <- model
       self$death_rate <- death_rate
-      self$kill_rate <- disturbance_rate
+      self$disturbance_rate <- disturbance_rate
       self$event <- event
       self$migration_rate <- migration_rate
       self$speciation_rate <- speciation_rate
       self$species_mapping <- list()
-      # self$next_local_id <- max(self$pattern) + 1
 
       # TODO : add whatever I want here when I create a neutral theory model
       #        - the species count
@@ -308,7 +307,6 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
       else {
           stop("Model not recognized. Please use 'local', 'meta' or 'default'")
       }
-
       # We store the result of that community in pattern for further control
       self$pattern <- self$local_cm$the_matrix
       self$next_local_id <- max(self$pattern) + 1
