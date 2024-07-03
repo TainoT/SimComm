@@ -172,7 +172,8 @@ neighbors_rank <- function(
     labs(title = "Rank and Neighbors over time",
          x = "Rank", y = "Neighbors",
          color = "Species") +
-    theme_minimal()
+    theme_minimal()+
+    theme(legend.position = "none")
   print(g)
 }
 
@@ -190,7 +191,8 @@ neighbors_time <- function(
     labs(title = "Time and Neighbors per species",
          x = "Time", y = "Neighbors",
          color = "Species") +
-    theme_minimal()
+    theme_minimal()+
+    theme(legend.position = "none")
   print(g)
 }
 
@@ -209,7 +211,8 @@ neighbors_abundance <- function(
     labs(title = "Abundance and Neighbors",
          x = "Abundance", y = "Neighbors",
          color = "Species") +
-    theme_minimal()
+    theme_minimal()+
+    theme(legend.position = "none")
   print(g)
 }
 
@@ -228,12 +231,13 @@ neighbors_abundance_time <- function(
     labs(title = "Abundance over time",
          x = "Time",
          color = "Species") +
-    theme_minimal()
+    theme_minimal()+
+    theme(legend.position = "none")
 
   g <- g +
-    geom_line(aes(y = neighbors * max(data$count) / max(data$neighbors),
+    geom_line(aes(y = neighbors * max(count) / max(neighbors),
                  color = factor(species)), linetype = "dashed") +
-    geom_point(aes(y = neighbors * max(data$count) / max(data$neighbors),
+    geom_point(aes(y = neighbors * max(count) / max(neighbors),
                   color = factor(species)), shape = 1, size = 1) +
     scale_y_continuous(
       sec.axis = sec_axis(~ . * max(data$neighbors) / max(data$count),
@@ -243,11 +247,12 @@ neighbors_abundance_time <- function(
 }
 
 
-blablabla <- function(
-    data = NULL) {
-  if (is.null(data))
+plot_neighbors_over_time <- function(data) {
+  if (is.null(data)) {
     stop("Data frame is missing")
+  }
 
+  # Plot: Relationship between Neighbors and Time, grouped by Species
   ggplot(data, aes(x = time, y = neighbors, color = factor(species))) +
     geom_point(size = 3) +
     geom_line(aes(group = species)) +
@@ -258,28 +263,34 @@ blablabla <- function(
       color = "Species"
     ) +
     theme_minimal() +
-    theme(
-      plot.title = element_text(hjust = 0.5),
-      legend.position = "bottom"
-    )
+    theme(legend.position = "none")
+}
+
+plot_abundance_and_neighbors <- function(data) {
+  if (is.null(data)) {
+    stop("Data frame is missing")
+  }
+
+  max_count <- max(data$count, na.rm = TRUE)
+  max_neighbors <- max(data$neighbors, na.rm = TRUE)
 
   # Plot with dual y-axes
-  ggplot() +
-    geom_line(data = data, aes(x = time, y = count, color = factor(species)), size = 1) +
-    geom_point(data = data, aes(x = time, y = count, color = factor(species)), size = 3) +
-    scale_y_continuous(name = "Abundance (Count)", sec.axis = sec_axis(~ . * max(data$neighbors) / max(data$count), name = "Average Number of Same-species Neighbors")) +
-    geom_line(data = data, aes(x = time, y = neighbors * max(data$count) / max(data$neighbors), color = factor(species)), linetype = "dashed") +
-    geom_point(data = data, aes(x = time, y = neighbors * max(data$count) / max(data$neighbors), color = factor(species)), shape = 1, size = 3) +
+  ggplot(data, aes(x = time)) +
+    geom_line(aes(y = count, color = factor(species)), size = 1) +
+    geom_point(aes(y = count, color = factor(species)), size = 3) +
+    scale_y_continuous(
+      name = "Abundance (Count)",
+      sec.axis = sec_axis(~ . * max_neighbors / max_count, name = "Average Number of Same-species Neighbors")
+    ) +
+    geom_line(aes(y = neighbors * max_count / max_neighbors, color = factor(species)), linetype = "dashed") +
+    geom_point(aes(y = neighbors * max_count / max_neighbors, color = factor(species)), shape = 1, size = 3) +
     labs(
       title = "Abundance and Neighbors over Time",
       x = "Time",
       color = "Species"
     ) +
     theme_minimal() +
-    theme(
-      plot.title = element_text(hjust = 0.5),
-      legend.position = "bottom"
-    )
+    theme(legend.position = "none")
 }
 
 
@@ -296,7 +307,8 @@ map_of_graphs <- list(
   "neighbors_time" = neighbors_time,
   "neighbors_abundance" = neighbors_abundance,
   "neighbors_abundance_time" = neighbors_abundance_time,
-  "blablabla" = blablabla
+  "plot_neighbors_over_time" = plot_neighbors_over_time,
+  "plot_abundance_and_neighbors" = plot_abundance_and_neighbors
 )
 
 
