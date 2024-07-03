@@ -86,14 +86,10 @@ model_simulation <- R6::R6Class("model_simulation",
       if (summary == "highest") {
         highest_ranked <- self$data_synth %>%
           filter(rank == 1) %>%
-          #group_by(simulation, species) %>%
-          #slice_max(rank, n = 1) %>%
-          #top_n(1, desc(rank)) %>%
           ungroup()
         mean_abundance <- highest_ranked %>%
           group_by(time) %>%
           summarise(mean_abundance = mean(count))
-        # store highest_ranked and mean_abundance in a named list called self$data_list
         self$data_graph <- list(highest_ranked, mean_abundance)
         names(self$data_graph) <- c("highest_ranked", "mean_abundance_highest")
       }
@@ -108,11 +104,13 @@ model_simulation <- R6::R6Class("model_simulation",
           geom_line(data = self$data_graph$mean_abundance_highest,
                     aes(x = time, y = mean_abundance, group = 1),
                     color = "red") +
+          geom_smooth(data = self$data_graph$mean_abundance_highest,
+                      aes(x = time, y = mean_abundance),
+                      method = "lm", se = FALSE, color = "blue", linewidth = 0.5) +
           labs(title = "Highest ranked species",
                x = "Time",
                y = "Abundance") +
           ylim(0, self$local_pattern$ny * self$local_pattern$nx) +
-          # facet_wrap(~simulation) +
           theme_minimal()
         print(gg)
       }

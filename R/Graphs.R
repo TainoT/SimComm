@@ -21,7 +21,6 @@
 #' @name graphs
 NULL
 
-
 #' @rdname timed_abundance
 #'
 #' @export
@@ -74,7 +73,7 @@ timed_relative_abundance <- function(
     theme(axis.title.x = element_blank(), legend.position = "none") +
     scale_y_continuous(labels = scales::percent_format())
   print(g)
-  }
+}
 
 #' @rdname overall_abundance_distribution
 #'
@@ -294,6 +293,46 @@ plot_abundance_and_neighbors <- function(data) {
 }
 
 
+cumul_new_extinct_species <- function(data) {
+  if (is.null(data)) {
+    stop("Data frame is missing")
+  }
+
+new_species <- numeric()
+extinct_species <- numeric()
+seen_species <- c()
+
+for (t in unique(data$time)) {
+  current_species <- data %>% filter(time == t) %>% pull(species)
+  if (t == min(unique(data$time))) {
+    new_species_count <- length(current_species)
+    extinct_species_count <- 0
+  } else {
+    new_species_count <- sum(!current_species %in% seen_species)
+    previous_species <- data %>% filter(time == (t - 1)) %>% pull(species)
+    extinct_species_count <- sum(!previous_species %in% current_species)
+  }
+
+  new_species <- c(new_species, new_species_count)
+  extinct_species <- c(extinct_species, extinct_species_count)
+  seen_species <- union(seen_species, current_species)
+}
+
+summary <- data.frame(  time = unique(data$time),  new_species = new_species,  extinct_species = extinct_species)
+summary <- summary %>% mutate(cumulative_new = cumsum(new_species),
+                              cumulative_extinct = cumsum(extinct_species))
+
+ggplot(summary, aes(x = time)) +
+  geom_line(aes(y = cumulative_new, color = 'New Species')) +
+  geom_line(aes(y = cumulative_extinct, color = 'Extinct Species')) +
+  labs(title = 'Cumulative New and Extinct Species Over Time',
+       x = 'Time',
+       y = 'Cumulative Count') +
+  scale_color_manual(name = 'Legend',
+                     values = c('New Species' = 'blue', 'Extinct Species' = 'red')) +
+  theme_minimal()
+}
+
 #' @rdname map_of_graphs
 #'
 #' @export
@@ -308,24 +347,6 @@ map_of_graphs <- list(
   "neighbors_abundance" = neighbors_abundance,
   "neighbors_abundance_time" = neighbors_abundance_time,
   "plot_neighbors_over_time" = plot_neighbors_over_time,
-  "plot_abundance_and_neighbors" = plot_abundance_and_neighbors
+  "plot_abundance_and_neighbors" = plot_abundance_and_neighbors,
+  "cumul_new_extinct_species" = cumul_new_extinct_species
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
