@@ -15,24 +15,29 @@ model_simulation <- R6::R6Class("model_simulation",
     sim_loop = function(run, timeline, neighborhood, model,
                        fashion = "matrix", save = T) {
       if (fashion == "matrix")
-        running <- SimComm::cm_hubbell$new(timeline = timeline,
-                              neighborhood = neighborhood, model = model)
+        running <- cm_hubbell$new(timeline = timeline,
+                              neighborhood = neighborhood, model = model,
+                              local_pattern = self$local_pattern,
+                              global_pattern = self$global_pattern)
       else if (fashion == "wmppp")
-        running <- SimComm::cp_hubbell$new(timeline = timeline,
-                              neighborhood = neighborhood, model = model)
+        running <- cp_hubbell$new(timeline = timeline,
+                              neighborhood = neighborhood, model = model,
+                              local_pattern = self$local_pattern,
+                              global_pattern = self$global_pattern)
       running$run(save = save)
-      df <- running$graph(save = save)
+      df <- running$synthesis(save = save, calc_neighbors = F)
       df$simulation <- run
-      print("1")
+      print(paste("Simulation", run, "completed"))
       return(df)
     }
   ),
   public = list(
     count = NULL,
-    # run = NULL,
     timeline = NULL,
     neighborhood = NULL,
     model = NULL,
+    local_pattern = NULL,
+    global_pattern = NULL,
     data_sim = NULL,
     data_synth = NULL,
     data_graph = list(),
@@ -41,17 +46,33 @@ model_simulation <- R6::R6Class("model_simulation",
         count = 15,
         timeline = 0:15,
         neighborhood = "Moore 1",
-        model = "local") {
+        model = "local",
+        local_pattern = NULL,
+        global_pattern = NULL) {
       self$count <- count
       self$timeline <- timeline
       self$neighborhood <- neighborhood
       self$model <- model
       self$data_sim <- vector("list", length = count)
+
+      if (is.null(local_pattern))
+        self$local_pattern <- local_pc$new()
+      else
+        self$local_pattern <- local_pattern
+      if (is.null(global_pattern))
+        self$global_pattern <- meta_pc$new()
+      else
+        self$global_pattern <- global_pattern
     },
 
     simulate = function(count = self$count, timeline = self$timeline,
                         neighborhood = self$neighborhood, model = self$model,
                         fashion = "matrix") {
+      self$count <- count
+      self$timeline <- timeline
+      self$neighborhood <- neighborhood
+      self$model <- model
+
       for (i in 1:self$count)
         self$data_sim[[i]] <- private$sim_loop(run = i, timeline = timeline,
                                                neighborhood = neighborhood,
@@ -64,8 +85,10 @@ model_simulation <- R6::R6Class("model_simulation",
     new_data = function(summary = "highest") {
       if (summary == "highest") {
         highest_ranked <- self$data_synth %>%
-          group_by(simulation, species) %>%
-          top_n(1, desc(rank)) %>%
+          filter(rank == 1) %>%
+          #group_by(simulation, species) %>%
+          #slice_max(rank, n = 1) %>%
+          #top_n(1, desc(rank)) %>%
           ungroup()
         mean_abundance <- highest_ranked %>%
           group_by(time) %>%
@@ -88,6 +111,7 @@ model_simulation <- R6::R6Class("model_simulation",
           labs(title = "Highest ranked species",
                x = "Time",
                y = "Abundance") +
+          ylim(0, self$local_pattern$ny * self$local_pattern$nx) +
           # facet_wrap(~simulation) +
           theme_minimal()
         print(gg)
