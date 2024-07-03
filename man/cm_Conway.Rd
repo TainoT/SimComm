@@ -49,6 +49,7 @@ Default is 3.}
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="plot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-plot'><code>SimComm::community_matrixmodel$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="prepare_buffer"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-prepare_buffer'><code>SimComm::community_matrixmodel$prepare_buffer()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="same_neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-same_neighbors'><code>SimComm::community_matrixmodel$same_neighbors()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="synthesis"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-synthesis'><code>SimComm::community_matrixmodel$synthesis()</code></a></span></li>
 </ul>
 </details>
 }}

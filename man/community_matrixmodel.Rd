@@ -35,6 +35,7 @@ A \link{community_model} whose pattern is a regular, rectangular grid of points.
 \item \href{#method-community_matrixmodel-same_neighbors}{\code{community_matrixmodel$same_neighbors()}}
 \item \href{#method-community_matrixmodel-plot}{\code{community_matrixmodel$plot()}}
 \item \href{#method-community_matrixmodel-autoplot}{\code{community_matrixmodel$autoplot()}}
+\item \href{#method-community_matrixmodel-synthesis}{\code{community_matrixmodel$synthesis()}}
 \item \href{#method-community_matrixmodel-graph}{\code{community_matrixmodel$graph()}}
 \item \href{#method-community_matrixmodel-clone}{\code{community_matrixmodel$clone()}}
 }
@@ -172,18 +173,35 @@ Its value should be in \code{timeline}.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-community_matrixmodel-synthesis"></a>}}
+\if{latex}{\out{\hypertarget{method-community_matrixmodel-synthesis}{}}}
+\subsection{Method \code{synthesis()}}{
+Produces the graphs
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$synthesis(
+  keep = NULL,
+  community = NULL,
+  save = NULL,
+  calc_neighbors = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{save}}{if \code{TRUE}, the evolution of the model is saved.
+if \code{FALSE}, only the final step is saved.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-community_matrixmodel-graph"></a>}}
 \if{latex}{\out{\hypertarget{method-community_matrixmodel-graph}{}}}
 \subsection{Method \code{graph()}}{
 Produces the graphs
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$graph(
-  time = 1,
-  graph = NULL,
-  keep = NULL,
-  community = NULL,
-  save = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$graph(graph = "all", time = 1)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -191,9 +209,6 @@ Produces the graphs
 \describe{
 \item{\code{time}}{The point of the timeline considered.
 Its value should be in \code{timeline}.}
-
-\item{\code{save}}{if \code{TRUE}, the evolution of the model is saved.
-if \code{FALSE}, only the final step is saved.}
 }
 \if{html}{\out{</div>}}
 }

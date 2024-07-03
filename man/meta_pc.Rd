@@ -47,7 +47,9 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{meta_pc$new(
   migration_rate = self$migration_rate,
-  speciation_rate = self$speciation_rate
+  speciation_rate = self$speciation_rate,
+  distribute = "entropart",
+  style = "random"
 )}\if{html}{\out{</div>}}
 }
 
@@ -74,7 +76,7 @@ Meta community default community drawing - add migr/spec_rate in the matrix
   Distribution = "lnorm",
   sd = 1,
   prob = 0.1,
-  theta = 40,
+  alpha = 40,
   migration_rate = self$migration_rate,
   speciation_rate = self$speciation_rate
 )}\if{html}{\out{</div>}}

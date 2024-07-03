@@ -42,7 +42,12 @@ Default is \code{0.1}}
 \subsection{Method \code{new()}}{
 Create a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{local_pc$new(fashion = "matrix", death_rate = self$death_rate)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{local_pc$new(
+  fashion = "matrix",
+  death_rate = self$death_rate,
+  distribute = "entropart",
+  style = "random"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -59,7 +64,7 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \if{html}{\out{<a id="method-local_pc-make_local"></a>}}
 \if{latex}{\out{\hypertarget{method-local_pc-make_local}{}}}
 \subsection{Method \code{make_local()}}{
-Local community default community drawing - add death/birth_rate in the matrix
+Local community default community drawing - add death_rate
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{local_pc$make_local(
   nx = 10,
@@ -68,9 +73,11 @@ Local community default community drawing - add death/birth_rate in the matrix
   Distribution = "lnorm",
   sd = 1,
   prob = 0.1,
-  theta = 40,
+  alpha = 40,
   death_rate = self$death_rate,
-  fashion = "matrix"
+  fashion = "matrix",
+  distribute = "entropart",
+  style = "random"
 )}\if{html}{\out{</div>}}
 }
 

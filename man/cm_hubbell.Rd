@@ -24,13 +24,13 @@ Edge effects are eliminated by a toroidal correction. (??? check that out)
 \describe{
 \item{\code{death_rate}}{The mortality rate of an individual.
 Default is \code{0.1}
-#' @field kill_rate The disturbance rate of an individual.
+#' @field disturbance_rate The disturbance rate of a community.
 #' Default is \code{1}}
 
-\item{\code{migration_rate}}{The reproduction rate of an individual.
+\item{\code{migration_rate}}{The migration rate of an individual.
 Default is \code{0.005}}
 
-\item{\code{speciation_rate}}{The reproduction rate of an individual.
+\item{\code{speciation_rate}}{The speciation rate of an individual.
 Default is \code{0.0001}}
 
 \item{\code{local_cm}}{The matrix local community}
@@ -38,6 +38,10 @@ Default is \code{0.0001}}
 \item{\code{meta_cm}}{The matrix meta community}
 
 \item{\code{model}}{The model to use}
+
+\item{\code{species_mapping}}{A mapping of meta species to local species}
+
+\item{\code{next_local_id}}{The next avilaible local id}
 }
 \if{html}{\out{</div>}}
 }
@@ -46,7 +50,6 @@ Default is \code{0.0001}}
 \itemize{
 \item \href{#method-cm_hubbell-new}{\code{cm_hubbell$new()}}
 \item \href{#method-cm_hubbell-show_values}{\code{cm_hubbell$show_values()}}
-\item \href{#method-cm_hubbell-count_species}{\code{cm_hubbell$count_species()}}
 \item \href{#method-cm_hubbell-clone}{\code{cm_hubbell$clone()}}
 }
 }
@@ -62,6 +65,7 @@ Default is \code{0.0001}}
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="plot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-plot'><code>SimComm::community_matrixmodel$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="prepare_buffer"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-prepare_buffer'><code>SimComm::community_matrixmodel$prepare_buffer()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="same_neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-same_neighbors'><code>SimComm::community_matrixmodel$same_neighbors()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="synthesis"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-synthesis'><code>SimComm::community_matrixmodel$synthesis()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -83,9 +87,9 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
   type = "Species",
   neighborhood = "Moore 1",
   global_pattern = NULL,
-  model = model,
+  model = self$model,
   death_rate = self$death_rate,
-  disturbance_rate = self$kill_rate,
+  disturbance_rate = self$disturbance_rate,
   event = NULL,
   migration_rate = self$migration_rate,
   speciation_rate = self$speciation_rate
@@ -113,18 +117,15 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \if{latex}{\out{\hypertarget{method-cm_hubbell-show_values}{}}}
 \subsection{Method \code{show_values()}}{
 Show the values of the model
+},
+
+#' @description
+#' DRAFT
+#TODO
+count_species = function() {
+self$species_count <- table(unlist(self$run_patterns))
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$show_values(values = "basic")}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cm_hubbell-count_species"></a>}}
-\if{latex}{\out{\hypertarget{method-cm_hubbell-count_species}{}}}
-\subsection{Method \code{count_species()}}{
-DRAFT
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$count_species()}\if{html}{\out{</div>}}
 }
 
 }

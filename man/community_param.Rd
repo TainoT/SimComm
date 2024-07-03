@@ -6,8 +6,6 @@
 \title{Community Attributes Class}
 \description{
 The class generate a community of a large number of species.
-\subsection{this part isn't complete yet}{
-}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -39,11 +37,13 @@ Set values of the community generation parameters (set to default if no argument
 \if{html}{\out{<div class="r">}}\preformatted{community_param$set_values(
   nx = 20,
   ny = nx,
-  S = 2,
+  S = 20,
   Distribution = "lnorm",
   sd = 1,
   prob = 0.1,
-  alpha = 40
+  alpha = 40,
+  distribute = "entropart",
+  style = "random"
 )}\if{html}{\out{</div>}}
 }
 
@@ -54,9 +54,7 @@ Set values of the community generation parameters (set to default if no argument
 
 \item{\code{ny}}{The size of vertical axis}
 
-\item{\code{S}}{The number of species.
-
-For the community drawing with entropart}
+\item{\code{S}}{The number of species.}
 
 \item{\code{Distribution}}{The distribution of species frequencies. May be "lnorm" (log-normal), "lseries" (log-series), "geom" (geometric) or "bstick" (broken stick).}
 
@@ -65,6 +63,10 @@ For the community drawing with entropart}
 \item{\code{prob}}{The proportion of ressources taken by successive species in the geometric model.}
 
 \item{\code{alpha}}{Fisher's alpha in the log-series model.}
+
+\item{\code{distribute}}{The type of distribution. May be "entropart" (entropart package), "random" or "uniform".}
+
+\item{\code{style}}{The style of the community. May be "random", "checkerboard" or "uniform".}
 }
 \if{html}{\out{</div>}}
 }
@@ -83,7 +85,7 @@ Show the values of the community generation parameters
 \if{html}{\out{<a id="method-community_param-draw_matrix"></a>}}
 \if{latex}{\out{\hypertarget{method-community_param-draw_matrix}{}}}
 \subsection{Method \code{draw_matrix()}}{
-Draw a community with no adjectives
+Draw a community
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{community_param$draw_matrix()}\if{html}{\out{</div>}}
 }

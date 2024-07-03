@@ -38,3 +38,4 @@ src/*.dll
 # pkgdown by Travis
 docs/
 R/.bin.R
+R/coco2.R

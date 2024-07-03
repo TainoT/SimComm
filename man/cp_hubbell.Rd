@@ -4,6 +4,11 @@
 \alias{cp_hubbell}
 \title{Hubbell's Neutral Theory Integration Class}
 \description{
+Hubbell's Neutral Theory Integration Class
+
+Hubbell's Neutral Theory Integration Class
+}
+\details{
 A \link{community_scpmodel} where each point contains an individual of one species.
 }
 \section{Super classes}{
@@ -12,6 +17,24 @@ A \link{community_scpmodel} where each point contains an individual of one speci
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{death_rate}}{The mortality rate of an individual.
+Default is \code{0.1}}
+
+\item{\code{kill_rate}}{The disturbance rate of the community.
+Default is \code{0}}
+
+\item{\code{migration_rate}}{The migration rate of an individual.
+Default is '0.005'}
+
+\item{\code{speciation_rate}}{The speciation rate of an individual.
+Default is '0.001'}
+
+\item{\code{model}}{The wmppp local community.}
+
+\item{\code{model}}{The wmppp meta community.}
+
+\item{\code{model}}{The model to use}
+
 \item{\code{n_neighbors}}{The number of nearest neighbors to take into account.}
 }
 \if{html}{\out{</div>}}
@@ -41,8 +64,21 @@ A \link{community_scpmodel} where each point contains an individual of one speci
 \if{html}{\out{<a id="method-cp_hubbell-new"></a>}}
 \if{latex}{\out{\hypertarget{method-cp_hubbell-new}{}}}
 \subsection{Method \code{new()}}{
+disturb the community at given time and replace the dead cells with the neighbours
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{cp_hubbell$new(pattern = NULL, timeline = 0, type = "Species", n_neighbors = 6)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{cp_hubbell$new(
+  local_pattern = NULL,
+  timeline = 0,
+  type = "Species",
+  n_neighbors = 6,
+  global_pattern = NULL,
+  model = self$model,
+  death_rate = self$death_rate,
+  disturbance_rate = self$kill_rate,
+  event = NULL,
+  migration_rate = self$migration_rate,
+  speciation_rate = self$speciation_rate
+)}\if{html}{\out{</div>}}
 }
 
 }
