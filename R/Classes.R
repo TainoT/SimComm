@@ -652,49 +652,65 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
     #' @description
     #' Produces the graphs
     #TODO add option to chose which community to plot (community = local/meta)
-    synthesis = function(keep = NULL, community = NULL, save = NULL) {
+    # it should ignore the pattern thing and go straight to the table itself
+    synthesis = function(keep = NULL, community = NULL, save = NULL, calc_neighbors = TRUE) {
       if(is.null(self$run_patterns)) {
         stop("No saved patterns. Run the model with argument save=TRUE before using saved patterns.")
       }
-
       #TODO add more index to the data_gen, diversity, neighbors, etc
       if (is.null(self$data_gen) || isTRUE(self$redraw)) {
-        data_list <- list()
+        data_list <- vector("list", length(self$timeline) - 1)
+
         for(i in 1:(length(self$timeline)-1)) {
-          species_data <- as.data.frame(table(self$saved_pattern(i)))
+          pattern <- self$saved_pattern(i)
+
+          species_data <- as.data.frame(table(pattern))
           species_data$time <- i
+
           #TODO
-          species_data$neighbors <- 0
-          for (c in species_data[species_data$time == i, "Var1"]) {
-            same_neighbors <- 0
-            total_cell <- 0
-            for (x in 1:nrow(self$saved_pattern(i))) {
-              for (y in 1:ncol(self$saved_pattern(i))) {
-                if (self$saved_pattern(i)[x,y] == c) {
-                  neighbors <- self$neighbors(x, y)
-                  same_neighbors <- same_neighbors + sum(neighbors == c)
-                  total_cell <- total_cell + 1
-                }
+          if (calc_neighbors) {
+            species_data$neighbors <- 0
+
+            for (c in species_data$pattern) {#species_data[species_data$time == i, "Var1"]) {#
+              same_neighbors <- 0
+              total_cell <- 0
+              for (x in 1:nrow(pattern)) {
+                for (y in 1:ncol(pattern)) {
+                  if (pattern[x,y] == c) {
+                    neighbors <- self$neighbors(x, y)
+                    same_neighbors <- same_neighbors + sum(neighbors == c)
+                    total_cell <- total_cell + length(neighbors) #+1 ?
+                  }
                   # species_data$neighbors[species_data$Var1 == c] <- sum(self$pattern[x, y] == self$neighbors(x, y)) # / length(self$neighbors(x, y))
-                # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
+                  # species_data$occurrence <- sum(self$pattern[x,y] == self$neighbors(x,y)) / length(self$neighbors(x,y))
+                }
               }
-            }
-            if (total_cell > 0) {
-            avg_neighbors <- same_neighbors / total_cell#sum(self$saved_pattern(i) == c)
-            species_data$neighbors[species_data$Var1 == c] <- avg_neighbors / length(self$neighbors(x, y))
+              if (total_cell > 0) {
+                avg_neighbors <- same_neighbors / total_cell#sum(self$saved_pattern(i) == c)
+                species_data$neighbors[species_data$pattern == c] <- avg_neighbors #/ length(self$neighbors(x,y))
+              }
+              # print(paste("Species:", c, "Same Neighbors:", same_neighbors, "Total Cells:", total_cell, "Avg Neighbors:", avg_neighbors))
             }
           }
           data_list[[i]] <- species_data
         }
         temp <- do.call(rbind, data_list)
-        colnames(temp) <- c("species", "count", "time", "neighbors")
+
+        if (calc_neighbors)
+          colnames(temp) <- c("species", "count", "time", "neighbors")
+        else
+          colnames(temp) <- c("species", "count", "time")
+
         temp$species <- as.numeric(as.character(temp$species))
         temp$count <- as.numeric(as.character(temp$count))
         temp$time <- as.numeric(temp$time)
         temp$rank <- ave(-temp$count, temp$time, FUN = function(x) as.integer(rank(x)))
+
         self$redraw <- FALSE
         self$data_gen <- temp
       }
+
+      self$is_synth <- TRUE
 
       if (isTRUE(save)) {
         return(self$data_gen)
@@ -703,8 +719,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
         print("writing data_gen.csv")
         write.csv(self$data_gen, "data_gen.csv")
       }
-
-      self$is_synth <- TRUE
     },
 
     #' @description
@@ -733,45 +747,6 @@ community_matrixmodel <- R6::R6Class("community_matrixmodel",
       }
       else
         stop("The graph argument is not recognized.")
-      }
-      # if (isTRUE(graph == "all")) {
-      #   overall_abundance_rank(data = self$data_gen)
-      #   timed_abundance(time = time, data = self$data_gen)
-      #   timed_relative_abundance(time = time, data = self$data_gen)
-      #   overall_abundance_distribution(data = self$data_gen)
-      #   relative_abundance_rank(data = self$data_gen)
-      # }
-      # else if (graph == "overall_abundance_rank") {
-      #   overall_abundance_rank(data = self$data_gen)
-      # }
-      # else if (graph == "timed_abundance") {
-      #   timed_abundance(time = time, data = self$data_gen)
-      # }
-      # else if (graph == "timed_relative_abundance") {
-      #   timed_relative_abundance(time = time, data = self$data_gen)
-      # }
-      # else if (graph == "overall_abundance_distribution") {
-      #   overall_abundance_distribution(data = self$data_gen)
-      # }
-      # else if (graph == "relative_abundance_rank") {
-      #   relative_abundance_rank(data = self$data_gen)
-      # }
-      # else if (graph == "neighbors_rank") {
-      #   neighbors_rank(data = self$data_gen)
-      # }
-      # else if (graph == "neighbors_time") {
-      #   neighbors_time(data = self$data_gen)
-      # }
-      # else if (graph == "neighbors_abundance") {
-      #   neighbors_abundance(data = self$data_gen)
-      # }
-      # else if (graph == "neighbors_abundance_time") {
-      #   neighbors_abundance_time(data = self$data_gen)
-      # }
-      # else if (graph == "blablabla") {
-      #   blablabla(data = self$data_gen)
-      # }
-      # else {
-      #   stop("The graph argument is not recognized.")
+    }
   )
 )
