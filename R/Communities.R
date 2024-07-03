@@ -3,33 +3,31 @@
 #' @description
 #' The class generate a community of a large number of species.
 #'
-#' ### this part isn't complete yet
 #' @docType class
-#' @param J The abundance of individuals
 #' @param S The number of species.
-#'
-#' For the community drawing with entropart
 #' @param nx The size of horizontal axis
 #' @param ny The size of vertical axis
+#'
 #' @param Distribution The distribution of species frequencies. May be "lnorm" (log-normal), "lseries" (log-series), "geom" (geometric) or "bstick" (broken stick).
 #' @param sd The simulated distribution standard deviation. For the log-normal distribution, this is the standard deviation on the log scale.
 #' @param prob The proportion of ressources taken by successive species in the geometric model.
 #' @param alpha Fisher's alpha in the log-series model.
 #'
-#' @param abundance The amount of individual in the community (community size)
+#' @param distribute The type of distribution. May be "entropart" (entropart package), "random" or "uniform".
+#' @param style The style of the community. May be "random", "checkerboard" or "uniform".
+#'
+#' @param the_matrix The matrix of the community.
+#' @param the_wmppp The wmppp of the community.
+#'
 #' @param death_rate The mortality rate of individuals
-#' @param birth_rate The reproduction rate of individuals
 #' @param migration_rate The migration rate of individuals from the meta community to the local community
 #' @param speciation_rate The speciation rate of individual in the local community
-#' @param community_type The type of community (local or meta)
-#' @param theta The compound value of community size and speciation rate
 #'
 #' @export
 community_param <- R6::R6Class("community_param",
   private = list(
   ),
   public = list(
-    J = NULL, # TODO use it to replace nx/ny
     nx = NULL,
     ny = NULL,
     S = NULL,
@@ -48,7 +46,6 @@ community_param <- R6::R6Class("community_param",
     #' Create a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
       self$set_values()
-      print("instanciation has been called : community_param")
     },
 
     #' @description
@@ -58,11 +55,13 @@ community_param <- R6::R6Class("community_param",
     set_values = function(
     nx = 20,
     ny = nx,
-    S = 2,
+    S = 20,
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
-    alpha = 40) {
+    alpha = 40,
+    distribute = "entropart",
+    style = "random") {
       self$nx = nx
       self$ny = ny
       self$S = S
@@ -70,11 +69,17 @@ community_param <- R6::R6Class("community_param",
       self$sd = sd
       self$prob = prob
       self$alpha = alpha
+      self$distribute = distribute
+      self$style = style
 
-      # if (!is.null(self$the_matrix))
-      #   self$the_matrix <- self$draw_matrix()
-      # else if (!is.null(self$the_wmppp))
-      #   self$the_wmppp <- self$draw_wmppp()
+      if (!is.null(self$the_matrix)){
+        temp <- self$draw_matrix()
+        self$the_matrix <- temp
+      }
+      else if (!is.null(self$the_wmppp)){
+        temp <- self$draw_wmppp()
+        self$the_wmppp <- temp
+      }
     },
 
     #' @description
@@ -93,7 +98,7 @@ community_param <- R6::R6Class("community_param",
     },
 
     #' @description
-    #' Draw a community with no adjectives
+    #' Draw a community
     draw_matrix = function(){
       if (self$distribute != "entropart" && self$distribute != "random" && self$distribute != "uniform") {
         self$distribute <- "entropart"
@@ -167,6 +172,7 @@ community_param <- R6::R6Class("community_param",
         }
       }
 
+
       # class(self$the_matrix) <- c("draw_matrix", class(self$the_matrix))
       return(self$the_matrix)
     },
@@ -226,7 +232,7 @@ local_pc <- R6::R6Class("local_pc",
       self$distribute <- distribute
       self$style <- style
       if (fashion == "matrix"){
-        self$the_matrix <- self$make_local(fashion = fashion)
+        self$the_matrix <- self$make_local(fashion = fashion, distribute = distribute, style = style)
       }
       else if (fashion == "wmppp") {
         self$the_wmppp <- self$make_local(fashion = fashion)
@@ -234,6 +240,7 @@ local_pc <- R6::R6Class("local_pc",
       else
         stop("No defined fashion")
     },
+
 
     #' @description
     #' Local community default community drawing - add death/birth_rate in the matrix
@@ -247,13 +254,15 @@ local_pc <- R6::R6Class("local_pc",
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
-    theta = 40,
+    alpha = 40,
     death_rate = self$death_rate,
-    fashion = "matrix") {
+    fashion = "matrix",
+    distribute = "entropart",
+    style = "random") {
       # We're NOT drawing the matrix
       self$set_values(nx = nx, ny = ny, S = S,
                       Distribution = Distribution, sd = sd,
-                      prob = prob, alpha = theta)
+                      prob = prob, alpha = alpha, distribute = distribute, style = style)
 
       if (isTRUE(fashion == "matrix")){
         self$the_matrix <- NULL
@@ -319,7 +328,7 @@ meta_pc <- R6::R6Class("meta_pc",
     Distribution = "lnorm",
     sd = 1,
     prob = 0.1,
-    theta = 40,
+    alpha = 40,
     migration_rate = self$migration_rate,
     speciation_rate = self$speciation_rate) {
       if (nx > 4000 || ny > 4000) {
@@ -329,7 +338,7 @@ meta_pc <- R6::R6Class("meta_pc",
       }
       self$set_values(nx = nx, ny = ny, S = S,
                       Distribution = Distribution, sd = sd,
-                      prob = prob, alpha = theta)
+                      prob = prob, alpha = alpha)
       self$the_matrix <- NULL
       self$the_matrix <- self$draw_matrix()
 
