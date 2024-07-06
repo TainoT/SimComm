@@ -8,7 +8,7 @@
 The class generate a meta community of a large number of species.
 }
 \section{Super class}{
-\code{SimComm::community_param2} -> \code{meta_pc2}
+\code{\link[SimComm:community_param2]{SimComm::community_param2}} -> \code{meta_pc2}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

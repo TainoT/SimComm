@@ -32,7 +32,6 @@ A \link{community_model} whose pattern is a regular, rectangular grid of points.
 \item \href{#method-community_matrixmodel-new}{\code{community_matrixmodel$new()}}
 \item \href{#method-community_matrixmodel-prepare_buffer}{\code{community_matrixmodel$prepare_buffer()}}
 \item \href{#method-community_matrixmodel-neighbors}{\code{community_matrixmodel$neighbors()}}
-\item \href{#method-community_matrixmodel-same_neighbors}{\code{community_matrixmodel$same_neighbors()}}
 \item \href{#method-community_matrixmodel-plot}{\code{community_matrixmodel$plot()}}
 \item \href{#method-community_matrixmodel-autoplot}{\code{community_matrixmodel$autoplot()}}
 \item \href{#method-community_matrixmodel-synthesis}{\code{community_matrixmodel$synthesis()}}
@@ -100,24 +99,6 @@ Prepare buffered_pattern at each step of evolution
 Return the vector of neighbors of a cell, defined by it row and column
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$neighbors(row, col)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{row}}{The row of the focal cell.}
-
-\item{\code{col}}{The column of the focal cell.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-community_matrixmodel-same_neighbors"></a>}}
-\if{latex}{\out{\hypertarget{method-community_matrixmodel-same_neighbors}{}}}
-\subsection{Method \code{same_neighbors()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{community_matrixmodel$same_neighbors(row, col, species)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

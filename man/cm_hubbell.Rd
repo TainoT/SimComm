@@ -23,9 +23,10 @@ Edge effects are eliminated by a toroidal correction. (??? check that out)
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{death_rate}}{The mortality rate of an individual.
-Default is \code{0.1}
-#' @field disturbance_rate The disturbance rate of a community.
-#' Default is \code{1}}
+Default is \code{0.1}}
+
+\item{\code{disturbance_rate}}{The disturbance rate of a community.
+Default is \code{1}}
 
 \item{\code{migration_rate}}{The migration rate of an individual.
 Default is \code{0.005}}
@@ -64,7 +65,6 @@ Default is \code{0.0001}}
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-neighbors'><code>SimComm::community_matrixmodel$neighbors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="plot"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-plot'><code>SimComm::community_matrixmodel$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="prepare_buffer"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-prepare_buffer'><code>SimComm::community_matrixmodel$prepare_buffer()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="same_neighbors"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-same_neighbors'><code>SimComm::community_matrixmodel$same_neighbors()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="SimComm" data-topic="community_matrixmodel" data-id="synthesis"><a href='../../SimComm/html/community_matrixmodel.html#method-community_matrixmodel-synthesis'><code>SimComm::community_matrixmodel$synthesis()</code></a></span></li>
 </ul>
 </details>
@@ -105,9 +105,9 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 
 \item{\code{neighborhood}}{A character string defining what is the neighborhood of a cell:
 "von Neumann 1" or "4" for the closest four neighbors (North, West, South, East);
-"Moore 1 or 8" for all adjacent cells (the first four and North-West, etc.);
-"Moore 2 or 24" for two rings of neighbors.
-"Global or 0" for the whole matrix as neighborhood.}
+"Moore 1" or "8" for all adjacent cells (the first four and North-West, etc.);
+"Moore 2" or "24" for two rings of neighbors.
+"Global" or "0" for the whole matrix as neighborhood.}
 }
 \if{html}{\out{</div>}}
 }
@@ -117,13 +117,6 @@ Create a new instance of this \link[R6:R6Class]{R6} class.
 \if{latex}{\out{\hypertarget{method-cm_hubbell-show_values}{}}}
 \subsection{Method \code{show_values()}}{
 Show the values of the model
-},
-
-#' @description
-#' DRAFT
-#TODO
-count_species = function() {
-self$species_count <- table(unlist(self$run_patterns))
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{cm_hubbell$show_values(values = "basic")}\if{html}{\out{</div>}}
 }

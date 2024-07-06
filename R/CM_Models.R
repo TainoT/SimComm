@@ -212,8 +212,8 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     #' @field death_rate The mortality rate of an individual.
     #' Default is `0.1`
     death_rate = 0.1,
-    #' #' @field disturbance_rate The disturbance rate of a community.
-    #' #' Default is `1`
+    #' @field disturbance_rate The disturbance rate of a community.
+    #' Default is `1`
     disturbance_rate = 0,
     #' @field migration_rate The migration rate of an individual.
     #' Default is `0.005`
@@ -229,7 +229,7 @@ cm_hubbell <- R6::R6Class("cm_hubbell",
     model = "default",
     #' @field species_mapping A mapping of meta species to local species
     species_mapping = NULL,
-    #'@field next_local_id The next avilaible local id
+    #' @field next_local_id The next avilaible local id
     next_local_id = NULL,
 
     #' @description

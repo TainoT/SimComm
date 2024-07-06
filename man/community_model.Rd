@@ -27,6 +27,8 @@ myModel$autoplot()
 \item{\code{last_time}}{The last time (in the time line) the model has been run.}
 
 \item{\code{run_patterns}}{The past patterns of the model, obtained by \code{run} and saved.}
+
+\item{\code{redraw}}{A logical that indicates if the model has been extended with more_time.}
 }
 \if{html}{\out{</div>}}
 }

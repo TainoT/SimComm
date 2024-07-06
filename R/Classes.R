@@ -91,7 +91,7 @@ community_model <- R6::R6Class("community_model",
     last_time = NULL,
     #' @field run_patterns The past patterns of the model, obtained by `run` and saved.
     run_patterns = NULL,
-    #' @field redraw
+    #' @field redraw A logical that indicates if the model has been extended with more_time.
     redraw = FALSE,
 
     #' @description
